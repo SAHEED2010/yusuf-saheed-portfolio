@@ -8,15 +8,19 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test:backend": "tsx scripts/backend-smoke.mjs"
+    "test:backend": "tsx scripts/backend-smoke.mjs",
+    "mcp": "tsx scripts/mcp-server.mjs",
+    "test:mcp": "tsx scripts/mcp-smoke.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "lucide-react": "^1.32.0",
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "simple-icons": "^16.28.0"
+    "simple-icons": "^16.28.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

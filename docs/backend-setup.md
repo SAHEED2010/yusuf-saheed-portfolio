@@ -14,7 +14,11 @@ Copy `.env.example` to `.env.local` and fill these values:
 - `WAKATIME_API_KEY`: optional server-only key; never expose it to client code
 - `DATABASE_PROVIDER`: `sqlite` for local development or `turso` for the hosted libSQL database
 - `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`: hosted libSQL connection values when Turso is selected
-- `AI_PROVIDER`: `none` until an approved provider is configured; use `openai` with `OPENAI_API_KEY` and `OPENAI_MODEL` after approval
+- `AI_PROVIDER`: `none` until an approved provider is configured; use `xai`, `openai`, or `anthropic`
+- `AI_MODEL` and `AI_BASE_URL`: optional provider-neutral overrides. Provider-specific model/key variables are `XAI_MODEL`/`XAI_API_KEY`, `OPENAI_MODEL`/`OPENAI_API_KEY`, and `ANTHROPIC_MODEL`/`ANTHROPIC_API_KEY`
+- `MCP_SERVER_TOKEN`: a long random bearer token used by ChatGPT, Claude, or another MCP client to access `/api/mcp`
+- `MCP_ALLOWED_ORIGIN`: exact web origin allowed to call the MCP endpoint, or `*` for clients that do not send browser origins
+- `MCP_PUBLISH_CONFIRMATION`: a separate phrase required for a publish tool call; draft creation never publishes
 - `NEWSLETTER_PROVIDER`: `none` until a provider is approved; use `resend` with `RESEND_API_KEY` and `RESEND_FROM` after domain setup
 
 Generate a password digest with PowerShell:
@@ -29,7 +33,7 @@ Generate a session secret with:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
 ```
 
-The admin dashboard is available at `/admin` after the environment is configured.
+The admin dashboard is available at `/admin` after the environment is configured. The MCP endpoint is `/api/mcp`; local desktop clients can use `npm run mcp` over stdio. Never put provider keys or `MCP_SERVER_TOKEN` in browser code or committed files.
 
 The database module uses `@libsql/client` for both local `file:` SQLite and hosted Turso. Schema migrations run automatically when the server first connects. Vercel's ephemeral filesystem must not be used as the production content database, so production must use `DATABASE_PROVIDER=turso` with both Turso connection values configured.
 
@@ -48,3 +52,10 @@ GitHub snapshots are cached in SQLite for one hour and fall back to the last ver
 - Newsletter signup is still a UI boundary. Resend (or another provider), a verified sending domain, subscriber storage, signed verification links, and unsubscribe delivery handling require an approved provider decision and credentials.
 - The admin assistant is intentionally a permission-boundary placeholder until an approved model/provider and private knowledge-source policy are configured. It must create reviewable drafts and never publish directly.
 - Turso credentials still need to be created and added to the deployment environment before production can use the hosted adapter.
+
+## Provider links
+
+- xAI API keys and models: `https://console.x.ai/`
+- OpenAI API keys: `https://platform.openai.com/api-keys`
+- Anthropic API keys: `https://console.anthropic.com/`
+- MCP client documentation: `https://modelcontextprotocol.io/`
