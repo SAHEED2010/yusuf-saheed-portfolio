@@ -16,14 +16,14 @@ export async function POST(request: Request) {
   const form = await request.formData();
   const action = String(form.get("action") ?? "save");
   const id = String(form.get("id") ?? "");
-  const existing = readAllRecords().find((item) => item.id === id);
+  const existing = (await readAllRecords()).find((item) => item.id === id);
   if (action === "publish" || action === "archive" || action === "restore") {
     if (!existing) return redirect(request, "/admin/content?error=missing");
     if (action === "publish" && existing.contentType === "project") {
       const errors = validateProject({ ...existing, lifecycle: "published", visibility: "public" });
       if (errors.length > 0) return redirect(request, `/admin/content?error=${encodeURIComponent(errors[0])}`);
     }
-    changeLifecycle(existing.id, action === "publish" ? "published" : action === "archive" ? "archived" : "draft");
+    await changeLifecycle(existing.id, action === "publish" ? "published" : action === "archive" ? "archived" : "draft");
     return redirect(request, "/admin/content?saved=1");
   }
   const now = new Date().toISOString();
@@ -54,6 +54,6 @@ export async function POST(request: Request) {
   };
   const errors = validateProject(candidate);
   if (errors.length > 0) return redirect(request, `/admin/content?error=${encodeURIComponent(errors[0])}`);
-  writeRecord(candidate, existing ? "update" : "create", existing ? `Updated ${candidate.title}` : `Created ${candidate.title}`);
+  await writeRecord(candidate, existing ? "update" : "create", existing ? `Updated ${candidate.title}` : `Created ${candidate.title}`);
   return redirect(request, "/admin/content?saved=1");
 }

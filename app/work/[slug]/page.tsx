@@ -1,5 +1,22 @@
 import { notFound } from "next/navigation";
 import { getCaseStudy, getPublished } from "@/content/store";
-import type { ProjectRecord } from "@/content/types";
 
-export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) { const { slug } = await params; const item = getPublished(slug); if (!item || item.contentType !== "project") notFound(); const project = getCaseStudy(item as ProjectRecord); const data = project.templateData; return <article className="detail"><p className="eyebrow">{data.template.replaceAll("-", " ")}</p><h1>{project.title}</h1><p className="lede">{project.summary}</p><p className="provenance">{project.role}</p>{project.body.map((paragraph) => <p className="body" key={paragraph}>{paragraph}</p>)}<section className="detail-section"><h2>What this record says</h2>{data.template === "product-system" && <><p><strong>Problem:</strong> {data.problem}</p><p><strong>Audience:</strong> {data.audience}</p><p><strong>Contribution:</strong> {data.contribution}</p><p><strong>Status:</strong> {data.status}</p><h3>System decisions</h3><ul>{data.decisions.map((decision) => <li key={decision}>{decision}</li>)}</ul><p><strong>Next improvement:</strong> {data.nextImprovement}</p></>}</section><section className="detail-section"><h2>Evidence and sources</h2>{project.evidence.map((evidence) => <p className="provenance" key={evidence.label}><strong>{evidence.label}</strong>{evidence.note ? ` — ${evidence.note}` : ""}{evidence.url ? <> <a href={evidence.url}>Open source</a></> : null}</p>)}{project.links.map((link) => <p key={link.url}><a href={link.url}>{link.label} →</a></p>)}</section></article>; }
+export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const item = await getPublished(slug);
+  if (!item || item.contentType !== "project") notFound();
+  const project = getCaseStudy(item);
+  const data = project.templateData;
+  return <article className="detail">
+    <p className="eyebrow">{data.template.replaceAll("-", " ")}</p><h1>{project.title}</h1><p className="lede">{project.summary}</p><p className="provenance">{project.role}</p>
+    {project.body.map((paragraph) => <p className="body" key={paragraph}>{paragraph}</p>)}
+    <section className="detail-section"><h2>What this record says</h2>{data.template === "product-system" && <>
+      <p><strong>Problem:</strong> {data.problem}</p><p><strong>Audience:</strong> {data.audience}</p><p><strong>Contribution:</strong> {data.contribution}</p><p><strong>Status:</strong> {data.status}</p>
+      <h3>System decisions</h3><ul>{data.decisions.map((decision) => <li key={decision}>{decision}</li>)}</ul><p><strong>Next improvement:</strong> {data.nextImprovement}</p>
+    </>}</section>
+    <section className="detail-section"><h2>Evidence and sources</h2>
+      {project.evidence.map((evidence) => <p className="provenance" key={evidence.label}><strong>{evidence.label}</strong>{evidence.note ? ` - ${evidence.note}` : ""}{evidence.url ? <> <a href={evidence.url}>Open source</a></> : null}</p>)}
+      {project.links.map((link) => <p key={link.url}><a href={link.url}>{link.label} &rarr;</a></p>)}
+    </section>
+  </article>;
+}

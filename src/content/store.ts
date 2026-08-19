@@ -6,17 +6,17 @@ function isPublished(item: AnyContentRecord) {
   return item.visibility === "public" && item.lifecycle === "published";
 }
 
-export function getPublished(slug: string): AnyContentRecord | undefined {
-  const item = readRecord(slug);
+export async function getPublished(slug: string): Promise<AnyContentRecord | undefined> {
+  const item = await readRecord(slug);
   return item && isPublished(item) ? item : undefined;
 }
 
-export function getIndexItems(type?: ContentType): AnyContentRecord[] {
-  return readAllRecords().filter((item) => isPublished(item) && (!type || item.contentType === type)).sort((a, b) => a.sortOrder - b.sortOrder);
+export async function getIndexItems(type?: ContentType): Promise<AnyContentRecord[]> {
+  return (await readAllRecords()).filter((item) => isPublished(item) && (!type || item.contentType === type)).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export function getAdminItems() {
-  return readAllRecords();
+export async function getAdminItems() {
+  return await readAllRecords();
 }
 
 export function getPreview(item: AnyContentRecord, _placement: "homepage" | "index"): PreviewItem {

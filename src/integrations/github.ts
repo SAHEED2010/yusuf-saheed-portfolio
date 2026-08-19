@@ -25,7 +25,7 @@ function headers(token: string) {
 
 export async function getGithubSnapshot(): Promise<GithubSnapshot> {
   const { username, token } = config();
-  const cached = readIntegrationSnapshot<GithubSnapshot>(cacheKey);
+  const cached = await readIntegrationSnapshot<GithubSnapshot>(cacheKey);
   const cacheAge = cached ? Date.now() - Date.parse(cached.refreshedAt) : Infinity;
   if (cached && cacheAge >= 0 && cacheAge < cacheTtlMs && cached.value.username === username) return { ...cached.value, tokenConfigured: Boolean(token) };
 
@@ -43,7 +43,7 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
       }
     }
     const snapshot: GithubSnapshot = { username, profileUrl: `https://github.com/${username}`, publicRepos: typeof profile.public_repos === "number" ? profile.public_repos : null, contributions, refreshedAt: new Date().toISOString(), state: "verified", tokenConfigured: Boolean(token) };
-    writeIntegrationSnapshot(cacheKey, snapshot, snapshot.refreshedAt);
+    await writeIntegrationSnapshot(cacheKey, snapshot, snapshot.refreshedAt);
     return snapshot;
   } catch {
     if (cached && cached.value.username === username) return { ...cached.value, state: "stale", tokenConfigured: Boolean(token) };

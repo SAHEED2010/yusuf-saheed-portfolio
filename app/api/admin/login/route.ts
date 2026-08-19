@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const email = String(form.get("email") ?? "");
   const password = String(form.get("password") ?? "");
   const address = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "anonymous";
-  const allowance = consumeRateLimit(`admin-login:${email.trim().toLowerCase()}:${address}`, 10, 15 * 60 * 1000);
+  const allowance = await consumeRateLimit(`admin-login:${email.trim().toLowerCase()}:${address}`, 10, 15 * 60 * 1000);
   if (!allowance.allowed) return NextResponse.redirect(new URL("/admin/login?error=rate-limit", request.url), 303);
   if (!credentialsMatch(email, password)) return NextResponse.redirect(new URL("/admin/login?error=invalid", request.url), 303);
   const response = NextResponse.redirect(new URL("/admin", request.url), 303);

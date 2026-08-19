@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   if (!(await isAdminSession())) redirect("/admin/login");
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
   const query = await searchParams;
   return <section className="admin-panel">
     <p className="eyebrow">Admin / Site settings</p>

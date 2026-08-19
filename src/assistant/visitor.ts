@@ -8,14 +8,14 @@ export type VisitorAnswer = {
 
 const blockedTerms = ["password", "private", "draft", "admin", "login", "publish", "secret", "message"];
 
-export function answerVisitorQuestion(question: string): VisitorAnswer {
+export async function answerVisitorQuestion(question: string): Promise<VisitorAnswer> {
   const normalized = question.trim().toLowerCase();
   if (!normalized) return { text: "Ask about Yusuf's published work, research direction, or how to get in touch.", links: [] };
   if (blockedTerms.some((term) => normalized.includes(term))) {
     return { text: "I can only discuss Yusuf's published portfolio and approved public sources. I cannot expose private material, drafts, credentials, or account actions.", links: [], boundary: true };
   }
   if (normalized.includes("atlas")) {
-    const atlas = getPublished("atlas");
+    const atlas = await getPublished("atlas");
     return { text: atlas?.summary ?? "Atlas is a human-approved data change intelligence system.", links: atlas?.links.map((link) => ({ label: link.label, href: link.url })) ?? [] };
   }
   if (normalized.includes("verified") || normalized.includes("evidence")) {

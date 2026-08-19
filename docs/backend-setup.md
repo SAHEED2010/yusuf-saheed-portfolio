@@ -12,7 +12,7 @@ Copy `.env.example` to `.env.local` and fill these values:
 - `GITHUB_USERNAME`: `SAHEED2010` unless the public profile changes
 - `GITHUB_TOKEN`: optional server-only token; required for contribution calendar data
 - `WAKATIME_API_KEY`: optional server-only key; never expose it to client code
-- `DATABASE_PROVIDER`: `sqlite` for local development; use `turso` only after a hosted libSQL adapter is provisioned
+- `DATABASE_PROVIDER`: `sqlite` for local development or `turso` for the hosted libSQL database
 - `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`: hosted libSQL connection values when Turso is selected
 - `AI_PROVIDER`: `none` until an approved provider is configured; use `openai` with `OPENAI_API_KEY` and `OPENAI_MODEL` after approval
 - `NEWSLETTER_PROVIDER`: `none` until a provider is approved; use `resend` with `RESEND_API_KEY` and `RESEND_FROM` after domain setup
@@ -31,7 +31,7 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'
 
 The admin dashboard is available at `/admin` after the environment is configured.
 
-The included SQLite adapter is appropriate for local development and a persistent single-server deployment. Vercel's ephemeral filesystem must not be used as the production content database; choose a hosted SQLite-compatible provider or PostgreSQL before deployment, then point `PORTFOLIO_DATABASE_PATH` or the database adapter at that durable service.
+The database module uses `@libsql/client` for both local `file:` SQLite and hosted Turso. Schema migrations run automatically when the server first connects. Vercel's ephemeral filesystem must not be used as the production content database, so production must use `DATABASE_PROVIDER=turso` with both Turso connection values configured.
 
 ## GitHub delivery setup
 
@@ -47,4 +47,4 @@ GitHub snapshots are cached in SQLite for one hour and fall back to the last ver
 
 - Newsletter signup is still a UI boundary. Resend (or another provider), a verified sending domain, subscriber storage, signed verification links, and unsubscribe delivery handling require an approved provider decision and credentials.
 - The admin assistant is intentionally a permission-boundary placeholder until an approved model/provider and private knowledge-source policy are configured. It must create reviewable drafts and never publish directly.
-- SQLite is local/single-server storage. Use a durable hosted database before deploying to an ephemeral serverless filesystem.
+- Turso credentials still need to be created and added to the deployment environment before production can use the hosted adapter.

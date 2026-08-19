@@ -1,5 +1,5 @@
 import { readSiteSettings } from "@/content/database";
 
-export function getSiteSettings() {
-  return readSiteSettings();
+export async function getSiteSettings() {
+  return await readSiteSettings();
 }

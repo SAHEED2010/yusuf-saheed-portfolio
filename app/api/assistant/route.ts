@@ -10,8 +10,8 @@ export async function POST(request: Request) {
   const question = typeof body?.question === "string" ? body.question.slice(0, 220) : "";
   const custom = !suggestedQuestions.includes(question);
   if (custom) {
-    const allowance = consumeCustomQuestion(request);
+    const allowance = await consumeCustomQuestion(request);
     if (!allowance.allowed) return NextResponse.json({ text: "The five custom questions for this rolling 24-hour period have been used. Suggested questions remain available.", links: [], boundary: true }, { status: 429, headers: { "Retry-After": String(allowance.retryAfterSeconds) } });
   }
-  return NextResponse.json(answerVisitorQuestion(question));
+  return NextResponse.json(await answerVisitorQuestion(question));
 }

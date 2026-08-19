@@ -19,8 +19,7 @@ const libraryRows = [
 ];
 
 export default async function HomePage() {
-  const [github, records] = await Promise.all([getGithubSnapshot(), Promise.resolve(getIndexItems())]);
-  const site = getSiteSettings();
+  const [github, records, site] = await Promise.all([getGithubSnapshot(), getIndexItems(), getSiteSettings()]);
   const featuredProject = records.find((item) => item.contentType === "project" && item.featured) ?? records.find((item) => item.contentType === "project");
   const project = featuredProject?.contentType === "project" ? featuredProject as ProjectRecord : undefined;
   const publications = records.filter((item) => item.contentType === "research" && item.id !== "library-research").length;

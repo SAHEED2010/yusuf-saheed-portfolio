@@ -47,6 +47,6 @@ function ProjectForm({ project }: { project?: ProjectRecord }) {
 export default async function AdminContentPage({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   if (!(await isAdminSession())) redirect("/admin/login");
   const query = await searchParams;
-  const projects = getAdminItems().filter((item): item is ProjectRecord => item.contentType === "project");
+  const projects = (await getAdminItems()).filter((item): item is ProjectRecord => item.contentType === "project");
   return <section className="admin-panel"><p className="eyebrow">Admin / Content</p><h1>Structured content workspace</h1><p className="lede">Create and edit project records through a reusable product-system template. Saves remain drafts until you explicitly publish them.</p>{query.saved && <p className="form-status">Saved.</p>}{query.error && <p className="form-status">{query.error}</p>}<div className="admin-records"><ProjectForm />{projects.map((project) => <ProjectForm project={project} key={project.id} />)}</div></section>;
 }

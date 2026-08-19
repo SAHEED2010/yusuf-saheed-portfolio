@@ -9,7 +9,7 @@ function keyFor(request: Request) {
   return createHash("sha256").update(address).digest("hex").slice(0, 24);
 }
 
-export function consumeCustomQuestion(request: Request) {
+export async function consumeCustomQuestion(request: Request) {
   const key = keyFor(request);
-  return consumeRateLimit(`visitor-assistant:${key}`, limit, windowMs);
+  return await consumeRateLimit(`visitor-assistant:${key}`, limit, windowMs);
 }
