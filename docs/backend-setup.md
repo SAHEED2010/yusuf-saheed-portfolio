@@ -12,6 +12,10 @@ Copy `.env.example` to `.env.local` and fill these values:
 - `GITHUB_USERNAME`: `SAHEED2010` unless the public profile changes
 - `GITHUB_TOKEN`: optional server-only token; required for contribution calendar data
 - `WAKATIME_API_KEY`: optional server-only key; never expose it to client code
+- `DATABASE_PROVIDER`: `sqlite` for local development; use `turso` only after a hosted libSQL adapter is provisioned
+- `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`: hosted libSQL connection values when Turso is selected
+- `AI_PROVIDER`: `none` until an approved provider is configured; use `openai` with `OPENAI_API_KEY` and `OPENAI_MODEL` after approval
+- `NEWSLETTER_PROVIDER`: `none` until a provider is approved; use `resend` with `RESEND_API_KEY` and `RESEND_FROM` after domain setup
 
 Generate a password digest with PowerShell:
 
