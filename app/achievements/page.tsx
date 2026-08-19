@@ -1,0 +1,1 @@
+export default function AchievementsPage() { return <section className="detail"><p className="eyebrow">Achievements</p><h1>Proof before promotion.</h1><p className="lede">Certificates, competitions, and milestones will be published from the dashboard only when the evidence and Yusuf's exact role are clear.</p></section>; }

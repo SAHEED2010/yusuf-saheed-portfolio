@@ -1,0 +1,1 @@
+export default function PrivacyPage() { return <section className="detail"><p className="eyebrow">Privacy</p><h1>Clear boundaries for a public portfolio.</h1><p className="lede">Published content, public-source synchronizations, visitor questions, and newsletter consent each have separate handling rules.</p></section>; }

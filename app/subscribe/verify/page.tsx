@@ -1,0 +1,1 @@
+export default function VerifySubscriptionPage() { return <section className="detail"><p className="eyebrow">Subscription verification</p><h1>Verify before notifications begin.</h1><p className="lede">The production route will validate an expiring signed link, confirm notification categories, and activate only a pending subscriber.</p></section>; }

@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { getIndexItems, getPreview } from "@/content/store";
+
+export default function WorkPage() { return <section className="detail"><p className="eyebrow">Selected systems</p><h1>Work with evidence attached.</h1><p className="lede">A scan-friendly index of products, experiments, tools, and team work. Each record distinguishes Yusuf's role from the team's outcome.</p><div className="project-grid">{getIndexItems("project").map((item) => { const preview = getPreview(item, "index"); return <article className="project-card" key={item.slug}><p className="meta">{preview.template?.replaceAll("-", " ")}</p><h3>{preview.title}</h3><p>{preview.summary}</p><p className="meta">{preview.role}</p><Link href={`/work/${preview.slug}`}>View case study →</Link></article>; })}</div></section>; }

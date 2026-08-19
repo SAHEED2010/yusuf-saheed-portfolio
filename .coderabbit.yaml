@@ -1,0 +1,25 @@
+language: en-US
+tone_instructions: "Be precise, evidence-led, and concise. Flag risks before style suggestions."
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  path_instructions:
+    - path: "app/**"
+      instructions: |
+        Check accessibility, responsive behavior, metadata, route boundaries, and server/client separation.
+    - path: "app/api/**"
+      instructions: |
+        Treat every handler as a security boundary. Review authentication, authorization, same-origin checks, input validation, rate limits, and error leakage.
+    - path: "src/content/**"
+      instructions: |
+        Check schema validation, lifecycle transitions, auditability, migrations, provenance, and prevention of fabricated claims.
+    - path: "src/assistant/**"
+      instructions: |
+        Check public/private permission separation, source grounding, refusal behavior, rate limiting, and protection of drafts and credentials.
+    - path: ".github/**"
+      instructions: |
+        Review workflow permissions, action pinning or version safety, secret exposure, and protected-branch assumptions.
+chat:
+  auto_reply: false

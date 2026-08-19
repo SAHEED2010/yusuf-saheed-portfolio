@@ -1,0 +1,7 @@
+# Review workflow, auth, database, and assistant changes explicitly.
+* @SAHEED2010
+.github/ @SAHEED2010
+src/admin/ @SAHEED2010
+src/content/ @SAHEED2010
+src/assistant/ @SAHEED2010
+app/api/ @SAHEED2010

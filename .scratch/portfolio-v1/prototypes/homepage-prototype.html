@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Throwaway homepage design prototype for Yusuf Saheed's portfolio.">
+  <title>Prototype - Yusuf Saheed Portfolio Directions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Space+Mono:wght@400;700&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; letter-spacing: 0; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; }
+    button, input, a { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 3px solid #ff6846; outline-offset: 3px; }
+    .variant { min-height: 100vh; padding-bottom: 110px; }
+    .prototype-switcher {
+      position: fixed; z-index: 100; left: 50%; bottom: 20px; transform: translateX(-50%);
+      display: grid; grid-template-columns: 44px minmax(190px, auto) 44px; align-items: center;
+      min-height: 52px; color: #fff; background: #0c0d0e; border: 1px solid #404348;
+      box-shadow: 0 12px 40px rgba(0,0,0,.28); font: 600 13px/1.2 "IBM Plex Sans", sans-serif;
+    }
+    .prototype-switcher button { width: 44px; height: 50px; color: #fff; background: transparent; border: 0; cursor: pointer; font-size: 20px; }
+    .prototype-switcher span { padding: 0 16px; text-align: center; white-space: nowrap; }
+    .assistant-toggle {
+      position: fixed; right: 24px; bottom: 88px; z-index: 80; min-height: 48px; display: inline-flex; align-items: center; gap: 9px; padding: 0 18px;
+      border: 0; background: #2457ff; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.24);
+      cursor: pointer; font: 700 14px/1 "DM Sans", sans-serif;
+    }
+    .assistant-toggle svg { width: 18px; height: 18px; stroke-width: 2; }
+    .assistant-panel {
+      position: fixed; z-index: 90; right: 24px; bottom: 148px; width: min(390px, calc(100vw - 32px));
+      max-height: min(650px, calc(100vh - 190px)); overflow: auto; color: #151719; background: #fff;
+      border: 1px solid #b9bec5; box-shadow: 0 20px 70px rgba(0,0,0,.3); font-family: "IBM Plex Sans", sans-serif;
+    }
+    .assistant-head { display: flex; justify-content: space-between; gap: 16px; align-items: start; padding: 18px; border-bottom: 1px solid #d8dde2; }
+    .assistant-head strong { display: block; font-size: 17px; }
+    .assistant-head small { display: block; margin-top: 4px; color: #626871; }
+    .assistant-close { width: 34px; height: 34px; flex: 0 0 34px; border: 1px solid #c9cdd2; background: #fff; cursor: pointer; font-size: 19px; }
+    .assistant-body { padding: 18px; }
+    .assistant-prompts { display: grid; gap: 8px; }
+    .assistant-prompts button { min-height: 42px; padding: 10px 12px; text-align: left; background: #f4f6f8; border: 1px solid #d8dde2; cursor: pointer; }
+    .assistant-message { min-height: 86px; margin: 14px 0; padding: 13px; background: #eef3ff; border-left: 4px solid #2457ff; font-size: 14px; line-height: 1.55; }
+    .assistant-sources { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; font-size: 12px; }
+    .assistant-sources a { color: #2457ff; font-weight: 700; }
+    .assistant-boundary { display: block; margin-top: 10px; color: #9a7100; font: 600 10px/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .assistant-form { display: grid; grid-template-columns: 1fr 44px; gap: 8px; }
+    .assistant-form input { min-width: 0; height: 44px; padding: 0 12px; border: 1px solid #9da4ad; }
+    .assistant-form button { width: 44px; height: 44px; border: 0; background: #111; color: #fff; cursor: pointer; }
+    .assistant-count { margin: 8px 0 0; color: #626871; font-size: 12px; }
+    body:not(.compare-mode) .assistant-toggle { bottom: 24px; }
+    body:not(.compare-mode) .assistant-panel { bottom: 84px; }
+
+    /* Direction A: Signal Lab */
+    .variant-a { padding-bottom: 0; color: #f3f6f4; background: #101214; font-family: "Manrope", sans-serif; transition: color .2s ease, background .2s ease; }
+    .variant-a :focus-visible { outline-color: #46b8b0; }
+    .a-shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .a-nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #394044; }
+    .a-mark { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 700; }
+    .a-mark b { display: grid; place-items: center; width: 36px; height: 36px; color: #101214; background: #e7c957; font-family: "IBM Plex Mono", monospace; }
+    .a-links { display: flex; align-items: center; gap: 24px; font-size: 13px; }
+    .a-links a { text-decoration: none; color: #c7cfcc; }
+    .a-nav-time { color: #8f9b98; font: 500 11px/1.2 "IBM Plex Mono", monospace; white-space: nowrap; }
+    .a-links .a-contact { padding: 11px 14px; color: #101214; background: #f3f6f4; }
+    .a-theme-toggle { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; padding: 0; color: #e7c957; background: transparent; border: 1px solid #566064; cursor: pointer; font-size: 17px; }
+    .a-hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 64px; align-items: center; padding: 70px 0 54px; }
+    .a-kicker { display: flex; align-items: center; gap: 10px; margin: 0 0 20px; color: #46b8b0; font: 600 12px/1.2 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .a-kicker::before { content: ""; width: 38px; height: 2px; background: #46b8b0; }
+    .a-hero h1 { max-width: 780px; margin: 0; font: 600 68px/.98 "Syne", sans-serif; }
+    .a-hero h1 span { color: #e7c957; }
+    .a-lede { max-width: 670px; margin: 25px 0 0; color: #bec7c4; font-size: 18px; line-height: 1.65; }
+    .a-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .a-actions a { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; text-decoration: none; border: 1px solid #566064; }
+    .a-actions a:first-child { color: #101214; background: #46b8b0; border-color: #46b8b0; font-weight: 700; }
+    .a-opportunity { margin: 20px 0 0; color: #8f9b98; font: 500 11px/1.6 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .a-portrait { position: relative; min-height: 470px; border: 1px solid #465055; overflow: hidden; background: #171b1d; }
+    .a-portrait img { width: 100%; height: 470px; object-fit: cover; }
+    .a-time-display svg { width: 13px; height: 13px; stroke-width: 1.8; }
+    .a-readout { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #394044; border-bottom: 1px solid #394044; }
+    .a-readout div { min-height: 112px; padding: 22px; border-right: 1px solid #394044; }
+    .a-readout div:last-child { border-right: 0; }
+    .a-readout strong { display: block; margin-bottom: 8px; color: #e7c957; font: 600 13px/1.2 "IBM Plex Mono", monospace; }
+    .a-readout span { color: #c5cdca; font-size: 13px; line-height: 1.5; }
+    .a-stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #394044; border-bottom: 1px solid #394044; }
+    .a-stat { min-height: 136px; display: flex; flex-direction: column; justify-content: center; padding: 22px; border-right: 1px solid #394044; }
+    .a-stat:last-child { border-right: 0; }
+    .a-stat strong { color: #f3f6f4; font: 600 36px/1 "Syne", sans-serif; }
+    .a-stat strong.a-stat-word { font-size: 24px; line-height: 1.05; }
+    .a-stat span { margin-top: 9px; color: #46b8b0; font: 600 11px/1.35 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .a-stat small { margin-top: 7px; color: #8f9b98; font-size: 11px; }
+    .a-connect { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr); gap: 42px; align-items: center; padding: 34px 0; border-bottom: 1px solid #394044; }
+    .a-connect-copy p { margin: 8px 0 0; color: #aeb8b5; font-size: 13px; line-height: 1.6; }
+    .a-connect-copy strong { font: 600 18px/1.25 "Syne", sans-serif; }
+    .a-contact-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+    .a-contact-links > a { width: 54px; height: 54px; display: grid; place-items: center; color: #c7cfcc; border: 1px solid #465055; text-decoration: none; transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease; }
+    .a-contact-links > a:hover, .a-contact-links > a:focus-visible { color: #f3f6f4; border-color: #46b8b0; background: #18312e; transform: translateY(-2px); }
+    .a-contact-links svg { width: 21px; height: 21px; stroke-width: 1.8; }
+    .a-contact-links img { width: 22px; height: 22px; object-fit: contain; }
+    .a-contact-links .a-x-icon { font: 700 18px/1 "Manrope", sans-serif; }
+    .a-contact-links .a-support { color: #111719; background: #ffdd00; border-color: #ffdd00; }
+    .a-contact-links .a-support:hover, .a-contact-links .a-support:focus-visible { color: #111719; background: #ffe642; border-color: #ffe642; }
+    .a-section { padding: 78px 0; }
+    .a-section-head { display: flex; justify-content: space-between; gap: 30px; align-items: end; margin-bottom: 30px; }
+    .a-section h2 { max-width: 670px; margin: 0; font: 600 42px/1.1 "Syne", sans-serif; }
+    .a-section-head p { max-width: 330px; margin: 0; color: #aeb8b5; font-size: 14px; line-height: 1.6; }
+    .a-project { display: grid; grid-template-columns: 1.1fr .9fr; border: 1px solid #465055; }
+    .a-project-media { min-height: 440px; background: #202527; overflow: hidden; }
+    .a-project-media img { width: 100%; height: 100%; min-height: 440px; object-fit: cover; object-position: left top; }
+    .atlas-mock { min-height: 440px; padding: 30px; color: #16191c; background: #e9edf0; font-family: "IBM Plex Mono", monospace; }
+    .atlas-mock-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 20px; border-bottom: 2px solid #16191c; }
+    .atlas-mock-head strong { font-size: 19px; }
+    .atlas-mock-head span { padding: 7px 10px; color: #fff; background: #d94b3d; font-size: 11px; }
+    .atlas-mock-path { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 28px 0; }
+    .atlas-mock-node { min-height: 92px; display: flex; align-items: center; padding: 14px; border: 1px solid #7c858c; background: #fff; font-size: 11px; line-height: 1.5; }
+    .atlas-mock-node:nth-child(2) { color: #fff; background: #2457ff; border-color: #2457ff; }
+    .atlas-mock-report { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 18px; align-items: center; padding: 20px; border: 1px solid #aab1b6; background: #f8fafb; }
+    .atlas-mock-score { display: grid; place-items: center; width: 76px; height: 76px; color: #fff; background: #d94b3d; border-radius: 50%; font-size: 24px; font-weight: 700; }
+    .atlas-mock-report h4 { margin: 0 0 7px; font-size: 13px; }
+    .atlas-mock-report p { margin: 0; color: #4f585e; font-size: 11px; line-height: 1.55; }
+    .a-project-copy { display: flex; flex-direction: column; justify-content: space-between; padding: 34px; }
+    .a-project-copy small { color: #46b8b0; font: 600 12px/1.2 "IBM Plex Mono", monospace; }
+    .a-project-copy h3 { margin: 16px 0; font: 600 36px/1.1 "Syne", sans-serif; }
+    .a-project-copy p { color: #bdc6c3; line-height: 1.65; }
+    .a-project-copy ul { padding: 0; margin: 22px 0; list-style: none; border-top: 1px solid #394044; }
+    .a-project-copy li { padding: 12px 0; border-bottom: 1px solid #394044; font: 500 12px/1.4 "IBM Plex Mono", monospace; }
+    .a-project-copy a { align-self: flex-start; color: #e7c957; text-decoration: none; font-weight: 700; }
+    .a-library { border-top: 1px solid #394044; }
+    .a-library-row { min-height: 126px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 160px; gap: 28px; align-items: center; padding: 22px 0; border-bottom: 1px solid #394044; }
+    .a-library-row code { color: #46b8b0; font: 600 11px/1.4 "IBM Plex Mono", monospace; }
+    .a-library-row h3 { margin: 0 0 7px; font: 600 24px/1.2 "Syne", sans-serif; }
+    .a-library-row p { max-width: 650px; margin: 0; color: #aeb8b5; font-size: 14px; line-height: 1.6; }
+    .a-library-row span { justify-self: end; color: #e7c957; font: 600 10px/1.4 "IBM Plex Mono", monospace; text-align: right; text-transform: uppercase; }
+    .a-impact { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 70px; align-items: end; padding: 74px 0; border-top: 1px solid #394044; }
+    .a-impact h2 { max-width: 760px; margin: 0; font: 600 42px/1.08 "Syne", sans-serif; }
+    .a-impact h2 span { color: #46b8b0; }
+    .a-impact-copy p { margin: 0 0 24px; color: #b9c3c0; font-size: 16px; line-height: 1.7; }
+    .a-impact-copy a { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; color: #101214; background: #e7c957; text-decoration: none; font-weight: 700; }
+    .a-newsletter { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); gap: 42px; align-items: end; padding: 48px 0; border-top: 1px solid #394044; border-bottom: 1px solid #394044; }
+    .a-newsletter .a-kicker { margin-bottom: 16px; }
+    .a-newsletter h2 { max-width: 650px; margin: 0; font: 600 34px/1.1 "Syne", sans-serif; }
+    .a-newsletter-copy p { max-width: 600px; margin: 14px 0 0; color: #b9c3c0; font-size: 14px; line-height: 1.65; }
+    .a-newsletter-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+    .a-newsletter-form input { min-width: 0; height: 48px; padding: 0 14px; color: #f3f6f4; background: #171b1d; border: 1px solid #566064; }
+    .a-newsletter-form button { min-height: 48px; padding: 0 16px; color: #101214; background: #46b8b0; border: 1px solid #46b8b0; cursor: pointer; font-weight: 700; }
+    .a-newsletter-note, .a-newsletter-status { grid-column: 1 / -1; margin: 0; color: #8f9b98; font: 500 11px/1.5 "IBM Plex Mono", monospace; }
+    .a-newsletter-status { min-height: 17px; color: #e7c957; }
+    .a-footer { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 24px 34px; padding: 28px 0 64px; border-top: 1px solid #394044; color: #8f9b98; font: 500 11px/1.5 "IBM Plex Mono", monospace; }
+    .a-footer-brand, .a-footer-nav, .a-footer-actions { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: start; }
+    .a-footer-brand { flex-direction: column; gap: 6px; }
+    .a-footer-brand strong { color: #f3f6f4; font: 600 15px/1.2 "Syne", sans-serif; }
+    .a-footer-nav a, .a-footer-actions a { color: #f3f6f4; text-decoration: none; text-underline-offset: 4px; }
+    .a-footer-actions { justify-content: end; }
+    .a-footer-meta { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid #394044; }
+    .a-footer a { color: #f3f6f4; text-underline-offset: 4px; }
+    .a-support-float { position: fixed; left: 24px; bottom: 24px; z-index: 75; display: inline-flex; align-items: center; gap: 9px; min-height: 48px; padding: 0 16px; color: #111719; background: #ffdd00; border: 1px solid #ffdd00; box-shadow: 0 10px 28px rgba(0,0,0,.22); text-decoration: none; font: 700 13px/1 "DM Sans", sans-serif; }
+    .a-support-float img { width: 22px; height: 22px; object-fit: contain; }
+    .a-support-float:hover, .a-support-float:focus-visible { background: #ffe642; border-color: #ffe642; transform: translateY(-2px); }
+
+    .variant-a[data-theme="light"] { color: #111719; background: #f7faf8; }
+    .variant-a[data-theme="light"] .a-nav,
+    .variant-a[data-theme="light"] .a-readout,
+    .variant-a[data-theme="light"] .a-stats,
+    .variant-a[data-theme="light"] .a-connect,
+    .variant-a[data-theme="light"] .a-library,
+    .variant-a[data-theme="light"] .a-impact,
+    .variant-a[data-theme="light"] .a-footer { border-color: #c4cecb; }
+    .variant-a[data-theme="light"] .a-readout div,
+    .variant-a[data-theme="light"] .a-stat,
+    .variant-a[data-theme="light"] .a-library-row,
+    .variant-a[data-theme="light"] .a-project-copy ul,
+    .variant-a[data-theme="light"] .a-project-copy li { border-color: #c4cecb; }
+    .variant-a[data-theme="light"] .a-links a,
+    .variant-a[data-theme="light"] .a-stat strong,
+    .variant-a[data-theme="light"] .a-footer a { color: #111719; }
+    .variant-a[data-theme="light"] .a-links .a-contact { color: #fff; background: #176b55; }
+    .variant-a[data-theme="light"] .a-mark b { color: #fff; background: #176b55; }
+    .variant-a[data-theme="light"] .a-hero h1 span,
+    .variant-a[data-theme="light"] .a-library-row span { color: #176b55; }
+    .variant-a[data-theme="light"] .a-actions a:first-child { color: #fff; background: #1c8066; border-color: #1c8066; }
+    .variant-a[data-theme="light"] .a-theme-toggle { color: #185f5a; border-color: #9caaa6; }
+    .variant-a[data-theme="light"] .a-lede,
+    .variant-a[data-theme="light"] .a-readout span,
+    .variant-a[data-theme="light"] .a-project-copy p,
+    .variant-a[data-theme="light"] .a-library-row p,
+    .variant-a[data-theme="light"] .a-impact-copy p { color: #46534f; }
+    .variant-a[data-theme="light"] .a-opportunity,
+    .variant-a[data-theme="light"] .a-stat small,
+    .variant-a[data-theme="light"] .a-connect-copy p,
+    .variant-a[data-theme="light"] .a-section-head p,
+    .variant-a[data-theme="light"] .a-footer { color: #61706b; }
+    .variant-a[data-theme="light"] .a-actions a { border-color: #8f9d99; }
+    .variant-a[data-theme="light"] .a-portrait { border-color: #9eaaa7; background: #dce4e1; }
+    .variant-a[data-theme="light"] .a-project { border-color: #9eaaa7; }
+    .variant-a[data-theme="light"] .a-impact-copy a { color: #fff; background: #176b55; }
+    .variant-a[data-theme="light"] .a-newsletter { border-color: #c4cecb; }
+    .variant-a[data-theme="light"] .a-newsletter-copy p { color: #46534f; }
+    .variant-a[data-theme="light"] .a-newsletter-form input { color: #111719; background: #fff; border-color: #8f9d99; }
+    .variant-a[data-theme="light"] .a-newsletter-note { color: #61706b; }
+    .variant-a[data-theme="light"] .a-footer-meta { border-color: #c4cecb; }
+    .variant-a[data-theme="light"] .a-footer-brand strong,
+    .variant-a[data-theme="light"] .a-footer-nav a,
+    .variant-a[data-theme="light"] .a-footer-actions a { color: #111719; }
+    .variant-a[data-theme="light"] .a-contact-links > a { color: #176b55; border-color: #b8c8c2; background: #fff; }
+    .variant-a[data-theme="light"] .a-contact-links > a:hover,
+    .variant-a[data-theme="light"] .a-contact-links > a:focus-visible { color: #fff; border-color: #176b55; background: #176b55; }
+    .variant-a[data-theme="light"] .a-contact-links .a-support { color: #111719; background: #ffdd00; border-color: #ffdd00; }
+    body.signal-light .assistant-panel { color: #111719; background: #f8faf9; border-color: #9eaaa7; }
+    body.signal-light .assistant-head { border-color: #c4cecb; }
+
+    /* Direction B: Field Notes */
+    .variant-b { color: #171a1d; background: #f7f8f5; font-family: "IBM Plex Sans", sans-serif; }
+    .b-grid { min-height: 100vh; display: grid; grid-template-columns: 250px minmax(0, 1fr); }
+    .b-side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 26px; border-right: 1px solid #aeb5b7; background: #eef1ef; }
+    .b-side a { text-decoration: none; }
+    .b-side strong { font: 600 21px/1.1 "Newsreader", serif; }
+    .b-side nav { display: grid; gap: 14px; font: 500 13px/1.2 "IBM Plex Mono", monospace; }
+    .b-side footer { color: #60686b; font-size: 12px; line-height: 1.6; }
+    .b-main { min-width: 0; }
+    .b-hero { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 48px; padding: 62px clamp(30px, 6vw, 88px); border-bottom: 1px solid #aeb5b7; }
+    .b-label { margin: 0 0 18px; color: #185adb; font: 600 12px/1.2 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .b-hero h1 { margin: 0; max-width: 800px; font: 600 76px/.94 "Newsreader", serif; }
+    .b-identity { margin: 22px 0 0; color: #d94b3d; font: 600 20px/1.3 "IBM Plex Mono", monospace; }
+    .b-intro { max-width: 760px; margin: 22px 0 0; font-size: 18px; line-height: 1.7; }
+    .b-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 28px; }
+    .b-links a { color: #185adb; text-underline-offset: 4px; }
+    .b-photo { margin: 0; align-self: start; }
+    .b-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border: 1px solid #171a1d; }
+    .b-band { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 44px; padding: 54px clamp(30px, 6vw, 88px); border-bottom: 1px solid #aeb5b7; }
+    .b-band-title { color: #185adb; font: 600 12px/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .b-records { display: grid; }
+    .b-record { display: grid; grid-template-columns: 110px minmax(0, 1fr) 150px; gap: 20px; padding: 22px 0; border-top: 1px solid #bdc3c4; }
+    .b-record:first-child { border-top: 0; padding-top: 0; }
+    .b-record code { color: #d94b3d; font: 600 12px/1.4 "IBM Plex Mono", monospace; }
+    .b-record h2 { margin: 0 0 8px; font: 600 27px/1.15 "Newsreader", serif; }
+    .b-record p { margin: 0; color: #4e5659; line-height: 1.6; }
+    .b-record a { align-self: start; color: #185adb; font-size: 13px; }
+    .b-evidence { margin-top: 16px; padding: 12px 14px; border-left: 3px solid #2f7d5a; background: #edf4ef; color: #35423a; font: 500 12px/1.55 "IBM Plex Mono", monospace; }
+    .b-questions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+    .b-question { min-height: 160px; padding: 20px 0; border-top: 1px solid #bdc3c4; }
+    .b-question span { color: #2f7d5a; font: 600 11px/1.2 "IBM Plex Mono", monospace; }
+    .b-question h3 { margin: 12px 0 8px; font: 600 24px/1.2 "Newsreader", serif; }
+    .b-question p { margin: 0; color: #555d60; line-height: 1.55; }
+
+    /* Direction C: Build Surface */
+    .variant-c { color: #111; background: #fff; font-family: "DM Sans", sans-serif; }
+    .c-nav { min-height: 72px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 30px; border-bottom: 2px solid #111; }
+    .c-nav strong { font: 400 14px/1 "Space Mono", monospace; }
+    .c-nav nav { display: flex; gap: 24px; }
+    .c-nav a { text-decoration: none; font-weight: 600; font-size: 13px; }
+    .c-nav .c-hire { justify-self: end; padding: 10px 14px; color: #fff; background: #111; }
+    .c-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, 38%); min-height: 620px; border-bottom: 2px solid #111; }
+    .c-hero-copy { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; padding: 54px 36px 36px; }
+    .c-hero h1 { margin: 0; font: 400 84px/.9 "Archivo Black", sans-serif; text-transform: uppercase; overflow-wrap: anywhere; }
+    .c-hero h1 span { display: block; color: #2457ff; }
+    .c-thesis { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: end; }
+    .c-thesis p { max-width: 620px; margin: 0; font-size: 20px; line-height: 1.5; }
+    .c-thesis a { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; color: #111; background: #a9e5c8; border: 2px solid #111; text-decoration: none; font-weight: 700; }
+    .c-hero-media { position: relative; overflow: hidden; border-left: 2px solid #111; background: #ff6846; }
+    .c-hero-media img { width: 100%; height: 100%; object-fit: cover; }
+    .c-route { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 2px solid #111; }
+    .c-route button { min-height: 92px; padding: 18px; border: 0; border-right: 2px solid #111; background: #fff; text-align: left; cursor: pointer; }
+    .c-route button:last-child { border-right: 0; }
+    .c-route button[aria-pressed="true"] { background: #2457ff; color: #fff; }
+    .c-route strong { display: block; margin-bottom: 6px; font: 700 13px/1.2 "Space Mono", monospace; }
+    .c-route span { font-size: 13px; line-height: 1.4; }
+    .c-work { display: grid; grid-template-columns: 42% 58%; min-height: 570px; border-bottom: 2px solid #111; }
+    .c-work-copy { display: flex; flex-direction: column; justify-content: space-between; padding: 38px; background: #a9e5c8; }
+    .c-work-copy small { font: 700 12px/1.2 "Space Mono", monospace; }
+    .c-work-copy h2 { margin: 22px 0; font: 400 48px/1 "Archivo Black", sans-serif; text-transform: uppercase; }
+    .c-work-copy p { max-width: 500px; font-size: 17px; line-height: 1.65; }
+    .c-work-copy ul { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0; list-style: none; }
+    .c-work-copy li { padding-top: 10px; border-top: 1px solid #111; font: 600 11px/1.45 "Space Mono", monospace; }
+    .c-work-copy a { align-self: flex-start; font-weight: 700; }
+    .c-work-media { min-width: 0; overflow: hidden; border-left: 2px solid #111; background: #d8dde2; }
+    .c-work-media img { width: 100%; height: 100%; object-fit: cover; object-position: left top; }
+    .c-bottom { display: grid; grid-template-columns: 1fr 1fr; }
+    .c-bottom section { min-height: 320px; padding: 38px; border-right: 2px solid #111; }
+    .c-bottom section:last-child { border-right: 0; background: #eef2ff; }
+    .c-bottom h2 { max-width: 480px; margin: 0 0 20px; font: 400 38px/1.05 "Archivo Black", sans-serif; text-transform: uppercase; }
+    .c-bottom p { max-width: 540px; line-height: 1.65; }
+    .c-bottom code { display: block; margin-top: 30px; color: #2457ff; font: 700 13px/1.5 "Space Mono", monospace; }
+
+    @media (max-width: 900px) {
+      .a-links a:not(.a-contact) { display: none; }
+      .a-hero { grid-template-columns: 1fr; gap: 36px; padding-top: 48px; }
+      .a-hero h1 { font-size: 50px; }
+      .a-portrait, .a-portrait img { min-height: 390px; height: 390px; }
+      .a-readout { grid-template-columns: repeat(2, 1fr); }
+      .a-readout div:nth-child(2) { border-right: 0; }
+      .a-readout div:nth-child(-n+2) { border-bottom: 1px solid #394044; }
+      .a-stats { grid-template-columns: repeat(2, 1fr); }
+      .a-stat:nth-child(2) { border-right: 0; }
+      .a-stat:nth-child(-n+2) { border-bottom: 1px solid #394044; }
+      .a-connect { grid-template-columns: 1fr; gap: 24px; }
+      .a-project { grid-template-columns: 1fr; }
+      .a-section-head { display: block; }
+      .a-section-head p { margin-top: 15px; }
+      .a-library-row { grid-template-columns: 170px minmax(0, 1fr) 130px; }
+      .a-impact { grid-template-columns: 1fr; gap: 28px; align-items: start; }
+      .a-newsletter { grid-template-columns: 1fr; gap: 24px; align-items: start; }
+      .b-grid { display: block; }
+      .b-side { position: static; width: 100%; height: auto; flex-direction: row; align-items: center; gap: 24px; border-right: 0; border-bottom: 1px solid #aeb5b7; }
+      .b-side nav { display: flex; flex-wrap: wrap; }
+      .b-side footer { display: none; }
+      .b-hero { grid-template-columns: 1fr; }
+      .b-hero h1 { font-size: 58px; }
+      .b-photo { max-width: 380px; }
+      .b-band { grid-template-columns: 1fr; gap: 24px; }
+      .c-nav { grid-template-columns: 1fr auto; }
+      .c-nav nav { display: none; }
+      .c-hero { grid-template-columns: 1fr; }
+      .c-hero h1 { font-size: 62px; }
+      .c-hero-media { min-height: 430px; border-left: 0; border-top: 2px solid #111; }
+      .c-work { grid-template-columns: 1fr; }
+      .c-work-media { min-height: 430px; border-left: 0; border-top: 2px solid #111; }
+    }
+
+    @media (max-width: 620px) {
+      .prototype-switcher { bottom: 12px; grid-template-columns: 42px minmax(160px, auto) 42px; }
+      .prototype-switcher span { padding: 0 10px; font-size: 12px; }
+      .assistant-toggle { right: 16px; bottom: 78px; }
+      .assistant-toggle { width: 48px; min-height: 48px; display: grid; place-items: center; padding: 0; }
+      .assistant-toggle span { display: none; }
+      .assistant-panel { right: 16px; bottom: 136px; }
+      body:not(.compare-mode) .assistant-toggle { bottom: 16px; }
+      body:not(.compare-mode) .assistant-panel { bottom: 80px; }
+      .a-shell { width: min(100% - 28px, 1180px); }
+      .a-nav { min-height: 66px; }
+      .a-mark span { display: none; }
+      .a-hero { padding: 38px 0; }
+      .a-hero h1 { font-size: 40px; }
+      .a-lede { font-size: 16px; }
+      .a-readout { grid-template-columns: 1fr; }
+      .a-readout div { border-right: 0; border-bottom: 1px solid #394044; }
+      .a-readout div:last-child { border-bottom: 0; }
+      .a-stats { grid-template-columns: 1fr; }
+      .a-stat { min-height: 112px; border-right: 0; border-bottom: 1px solid #394044; }
+      .a-stat:nth-child(2) { border-right: 0; }
+      .a-stat:last-child { border-bottom: 0; }
+      .a-contact-links { justify-content: flex-start; }
+      .a-section { padding: 58px 0; }
+      .a-section h2 { font-size: 34px; }
+      .a-project-media, .a-project-media img { min-height: 280px; }
+      .a-project-copy { padding: 24px; }
+      .a-library-row { display: block; min-height: 0; padding: 24px 0; }
+      .a-library-row h3 { margin-top: 12px; font-size: 22px; }
+      .a-library-row span { display: block; margin-top: 14px; text-align: left; }
+      .a-impact { padding: 58px 0; }
+      .a-impact h2 { font-size: 34px; }
+      .a-footer { display: block; }
+      .a-footer-brand, .a-footer-nav, .a-footer-actions { margin-bottom: 18px; justify-content: flex-start; }
+      .a-footer-meta { display: block; }
+      .a-support-float { display: none; }
+      .b-side { padding: 20px 18px; align-items: start; }
+      .b-side nav { justify-content: end; gap: 10px; }
+      .b-hero, .b-band { padding: 38px 20px; }
+      .b-hero h1 { font-size: 46px; }
+      .b-intro { font-size: 16px; }
+      .b-record { grid-template-columns: 1fr; gap: 8px; }
+      .b-questions { grid-template-columns: 1fr; }
+      .c-nav { padding: 0 18px; }
+      .c-hero { min-height: auto; }
+      .c-hero-copy { min-height: 500px; padding: 38px 20px 24px; }
+      .c-hero h1 { font-size: 46px; }
+      .c-thesis { grid-template-columns: 1fr; }
+      .c-thesis p { font-size: 17px; }
+      .c-route { grid-template-columns: 1fr; }
+      .c-route button { min-height: 74px; border-right: 0; border-bottom: 2px solid #111; }
+      .c-route button:last-child { border-bottom: 0; }
+      .c-work-copy { padding: 28px 20px; }
+      .c-work-copy h2 { font-size: 38px; }
+      .c-work-copy ul { grid-template-columns: 1fr; }
+      .c-bottom { grid-template-columns: 1fr; }
+      .c-bottom section { padding: 30px 20px; border-right: 0; border-bottom: 2px solid #111; }
+      .c-bottom section:last-child { border-bottom: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <!-- PROTOTYPE ONLY: Three homepage directions switchable with ?variant=A, B, or C. -->
+  <main>
+    <div class="variant variant-a" data-variant="A">
+      <div class="a-shell">
+        <header class="a-nav">
+          <a class="a-mark" href="/"><b>YS</b><span>Yusuf Saheed</span></a>
+          <nav class="a-links" aria-label="Primary navigation">
+            <a href="/work">Work</a><a href="/library">Library</a><a href="/achievements">Achievements</a><a href="/about">About</a><time class="a-nav-time" data-nigeria-time datetime="">Lagos --:-- WAT</time>
+            <button class="a-theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode" title="Switch to light mode"><span aria-hidden="true">&#9728;</span></button>
+            <a class="a-contact" href="/contact">Work with me</a>
+          </nav>
+        </header>
+        <section class="a-hero">
+          <div>
+            <p class="a-kicker">Engineering, Science &amp; AI</p>
+            <h1>Yusuf Saheed builds systems for the <span>real world.</span></h1>
+            <p class="a-lede">Software engineer, AI builder, scientific explorer and CodedDevs co-founder turning difficult ideas into useful products, practical research and knowledge other people can build on.</p>
+            <div class="a-actions"><a href="/work">Explore my work</a><a href="/contact">Start a conversation</a></div>
+            <p class="a-opportunity">Open to engineering roles, collaborations, research, startup work and technology problems worth solving.</p>
+          </div>
+          <figure class="a-portrait">
+            <img src="yusuf-portrait.jpeg" alt="Portrait of Yusuf Saheed">
+          </figure>
+        </section>
+        <section class="a-stats" aria-label="Selected activity statistics">
+          <div class="a-stat"><strong>140</strong><span>GitHub contributions</span><small>Verified GraphQL snapshot · Aug 18, 2026</small></div>
+          <div class="a-stat"><strong id="github-repo-count">48</strong><span>Public repositories</span><small id="github-sync-state" aria-live="polite">Verified snapshot · fetching public profile</small></div>
+          <div class="a-stat"><strong class="a-stat-word">Sync pending</strong><span>WakaTime activity</span><small>No hours shown until a verified server integration is configured</small></div>
+          <div class="a-stat"><strong>0</strong><span>Verified publications</span><small>First release in preparation</small></div>
+        </section>
+        <section class="a-connect" aria-label="Contact and social links">
+          <div class="a-connect-copy"><strong>Find the work. Reach the person.</strong><p>Every route opens the real profile or contact channel.</p></div>
+          <div class="a-contact-links">
+            <a href="https://github.com/SAHEED2010" aria-label="GitHub" title="GitHub"><i data-lucide="github" aria-hidden="true"></i></a>
+            <a href="https://www.linkedin.com/in/yusuf-saheed123/" aria-label="LinkedIn" title="LinkedIn"><i data-lucide="linkedin" aria-hidden="true"></i></a>
+            <a href="https://x.com/yusufsaheed01" aria-label="X" title="X"><span class="a-x-icon" aria-hidden="true">X</span></a>
+            <a href="mailto:yusufsaheed2012@gmail.com" aria-label="Email" title="Email"><i data-lucide="mail" aria-hidden="true"></i></a>
+            <a href="https://wa.me/2348106249995?text=Hello%20Yusuf%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20technology%20project%20or%20opportunity%20with%20you." aria-label="WhatsApp" title="WhatsApp"><i data-lucide="message-circle" aria-hidden="true"></i></a>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Lagos%2C%20Nigeria" aria-label="Lagos, Nigeria" title="Lagos, Nigeria"><i data-lucide="map-pin" aria-hidden="true"></i></a>
+            <a class="a-support" href="https://buymeacoffee.com/yusufsaheed" aria-label="Buy me a coffee" title="Buy me a coffee"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="" aria-hidden="true"></a>
+          </div>
+        </section>
+        <section class="a-section" id="a-work">
+          <div class="a-section-head"><h2>Selected systems and useful work.</h2><p>Claims are connected to repositories, live demonstrations and Yusuf's exact contribution.</p></div>
+          <article class="a-project">
+            <div class="a-project-media"><div class="atlas-mock" role="img" aria-label="Prototype visualization of Atlas schema impact analysis"><div class="atlas-mock-head"><strong>ATLAS / IMPACT TRACE</strong><span>CRITICAL</span></div><div class="atlas-mock-path"><div class="atlas-mock-node">SOURCE<br>customer_segment</div><div class="atlas-mock-node">LINEAGE<br>12 downstream assets</div><div class="atlas-mock-node">APPROVAL<br>Action required</div></div><div class="atlas-mock-report"><div class="atlas-mock-score">12</div><div><h4>DOWNSTREAM ASSETS AT RISK</h4><p>Deterministic lineage evidence prepared for human review before any execution step.</p></div></div></div></div>
+            <div class="a-project-copy">
+              <div><small>FEATURED AI SYSTEM / 2026</small><h3>Atlas</h3><p>A human-approved data change intelligence agent that traces schema impact, ranks downstream risk and prepares execution steps.</p><ul><li>GEMINI + FIVETRAN TOOL INTERFACE</li><li>DETERMINISTIC RISK EVIDENCE</li><li>31 VERIFIED COMMITS BY YUSUF</li></ul></div>
+              <a href="https://github.com/coded-devs/Atlas">Open project evidence &rarr;</a>
+            </div>
+          </article>
+        </section>
+        <section class="a-section" id="a-library">
+          <div class="a-section-head"><h2>A Library for learning in public.</h2><p>Technical guidance, scientific questions and hard-earned lessons sit beside the projects that produced them.</p></div>
+          <div class="a-library">
+            <article class="a-library-row"><code>LIBRARY / TUTORIALS</code><div><h3>Tutorials</h3><p>Practical walkthroughs for building software, learning technical ideas and turning scattered materials into a usable path.</p></div><span>Publishing soon</span></article>
+            <article class="a-library-row"><code>LIBRARY / RESEARCH</code><div><h3>Research &amp; Publications</h3><p>Structured investigations, papers and sourced explorations with clear evidence, uncertainty and revision history.</p></div><span>0 verified publications</span></article>
+            <article class="a-library-row"><code>LIBRARY / QUESTIONS</code><div><h3>Tough Questions</h3><p>Mathematical problems, scientific questions and unfinished lines of thought worth examining carefully.</p></div><span>Draft collection</span></article>
+            <article class="a-library-row"><code>LIBRARY / RESOURCES</code><div><h3>Videos &amp; Resources</h3><p>Curated explanations and materials that make difficult engineering, science and AI topics easier to enter.</p></div><span>Collection planned</span></article>
+            <article class="a-library-row"><code>LIBRARY / MILESTONES</code><div><h3>Hackathons &amp; Achievements</h3><p>Evidence-backed records of competitions, certificates, projects, placements and the lessons behind them.</p></div><span>Proof being prepared</span></article>
+          </div>
+        </section>
+        <section class="a-impact" id="a-impact">
+          <h2>Build deeply. Learn openly. Create <span>useful impact.</span></h2>
+          <div class="a-impact-copy"><p>I work with teams, founders and organizations that need thoughtful technology, and I share what I learn for people finding their way into engineering, science and AI.</p><a href="mailto:yusufsaheed2012@gmail.com">Discuss a project or opportunity</a></div>
+        </section>
+        <section class="a-newsletter" id="a-subscribe" aria-labelledby="newsletter-title">
+          <div class="a-newsletter-copy"><p class="a-kicker">NOTES FROM THE LAB</p><h2 id="newsletter-title">Get the next useful release.</h2><p>Receive a short notification when Yusuf publishes an article, research note, publication, tutorial, or selected system update.</p></div>
+          <form class="a-newsletter-form" data-newsletter-form>
+            <label for="newsletter-email" hidden>Email address</label>
+            <input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            <button type="submit">Subscribe</button>
+            <small class="a-newsletter-note">Double opt-in and unsubscribe will be required in the production release.</small>
+            <p class="a-newsletter-status" aria-live="polite"></p>
+          </form>
+        </section>
+        <footer class="a-footer">
+          <div class="a-footer-brand"><strong>YS / Engineering, Science &amp; AI</strong><span>Lagos, Nigeria / West Africa Time</span></div>
+          <nav class="a-footer-nav" aria-label="Footer navigation"><a href="/work">Work</a><a href="/library">Library</a><a href="/achievements">Achievements</a><a href="/about">About</a><a href="/contact">Contact</a></nav>
+          <div class="a-footer-actions"><a href="mailto:yusufsaheed2012@gmail.com">Email Yusuf</a><a href="https://buymeacoffee.com/yusufsaheed">Support my work</a></div>
+          <small class="a-footer-meta">&copy; <span data-footer-year>2026</span> Yusuf Saheed. Built in Lagos for a global audience.</small>
+        </footer>
+        <a class="a-support-float" href="https://buymeacoffee.com/yusufsaheed" aria-label="Support Yusuf's work" title="Support Yusuf's work"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="" aria-hidden="true"><span>Support my work</span></a>
+      </div>
+    </div>
+
+    <div class="variant variant-b" data-variant="B" hidden>
+      <div class="b-grid">
+        <aside class="b-side">
+          <a href="#"><strong>Yusuf<br>Saheed</strong></a>
+          <nav aria-label="Primary navigation"><a href="#b-work">Selected work</a><a href="#b-questions">Open questions</a><a href="#b-contact">Contact</a></nav>
+          <footer>Personal research folio<br>Revision 01 / 2026</footer>
+        </aside>
+        <div class="b-main">
+          <section class="b-hero">
+            <div><p class="b-label">Profile note / YS-001</p><h1>Yusuf Saheed</h1><p class="b-identity">Engineering, Science &amp; AI</p><p class="b-intro">I build software and intelligent systems, study the questions behind them, and turn useful ideas into products for people navigating real constraints.</p><div class="b-links"><a href="https://github.com/SAHEED2010">GitHub</a><a href="https://www.linkedin.com/in/yusuf-saheed123/">LinkedIn</a><a href="mailto:yusufsaheed2012@gmail.com">Email</a><a href="#b-contact">Curriculum vitae</a></div></div>
+            <figure class="b-photo"><img src="yusuf-portrait.jpeg" alt="Portrait of Yusuf Saheed"></figure>
+          </section>
+          <section class="b-band" id="b-work">
+            <div class="b-band-title">Selected evidence</div>
+            <div class="b-records">
+              <article class="b-record"><code>PRODUCT / 01</code><div><h2>Twizrr</h2><p>A Nigerian social-commerce marketplace designed around buyer protection, web discovery and WhatsApp shopping.</p><div class="b-evidence">Evidence pending: current product status, Yusuf's contribution narrative and approved media.</div></div><a href="https://github.com/SAHEED2010/Twizrr-Mvp">Repository &rarr;</a></article>
+              <article class="b-record"><code>AGENT / 02</code><div><h2>Atlas</h2><p>Data change intelligence with deterministic lineage evidence, AI reasoning and a human approval gate.</p><div class="b-evidence">Verified: 31 public commits attributed to SAHEED2010.</div></div><a href="https://github.com/coded-devs/Atlas">Case evidence &rarr;</a></article>
+              <article class="b-record"><code>SYSTEM / 03</code><div><h2>School management portal</h2><p>A full-stack administration system spanning roles, academic operations, payments and communication.</p><div class="b-evidence">Publication requires permission and current live-state confirmation.</div></div><a href="https://github.com/SAHEED2010/Home-Science-Association">Repository &rarr;</a></article>
+            </div>
+          </section>
+          <section class="b-band" id="b-questions">
+            <div class="b-band-title">Open questions</div>
+            <div class="b-questions">
+              <article class="b-question"><span>MATHEMATICS / UPCOMING</span><h3>Questions worth keeping open</h3><p>Problems, derivations and working notes will be published here with sources and revision history.</p></article>
+              <article class="b-question"><span>SCIENCE / UPCOMING</span><h3>Experiments and observations</h3><p>Explorations will distinguish hypotheses, evidence, results and unresolved uncertainty.</p></article>
+              <article class="b-question"><span>AI / ACTIVE</span><h3>How should agents act safely?</h3><p>Atlas provides one answer: deterministic evidence, explicit tools and a human approval boundary.</p></article>
+              <article class="b-question" id="b-contact"><span>COLLABORATION</span><h3>Bring a difficult problem.</h3><p><a href="mailto:yusufsaheed2012@gmail.com">yusufsaheed2012@gmail.com</a></p></article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="variant variant-c" data-variant="C" hidden>
+      <header class="c-nav"><strong>YS / 2026</strong><nav aria-label="Primary navigation"><a href="#c-work">Work</a><a href="#c-notes">Research</a><a href="#c-notes">Writing</a></nav><a class="c-hire" href="mailto:yusufsaheed2012@gmail.com">Work with me</a></header>
+      <section class="c-hero">
+        <div class="c-hero-copy"><h1>Yusuf <span>Saheed</span></h1><div class="c-thesis"><p>Engineer, scientific explorer and AI builder creating useful systems, products and research for real-world constraints.</p><a href="#c-work">Explore the work &rarr;</a></div></div>
+        <div class="c-hero-media"><img src="yusuf-portrait.jpeg" alt="Portrait of Yusuf Saheed"></div>
+      </section>
+      <div class="c-route" aria-label="Choose an interest">
+        <button type="button" aria-pressed="true" data-route="build"><strong>I hire builders</strong><span>Products, systems and engineering evidence.</span></button>
+        <button type="button" aria-pressed="false" data-route="research"><strong>I follow ideas</strong><span>Research, publications and open questions.</span></button>
+        <button type="button" aria-pressed="false" data-route="venture"><strong>I build companies</strong><span>Startup work, collaboration and product direction.</span></button>
+      </div>
+      <section class="c-work" id="c-work">
+        <div class="c-work-copy"><div><small>SELECTED SYSTEM / ATLAS</small><h2>Know the blast radius before the change.</h2><p>Atlas analyzes proposed data schema changes, maps downstream impact and places execution behind a human approval gate.</p><ul><li>AI AGENT WORKFLOW</li><li>DETERMINISTIC EVIDENCE</li><li>HUMAN-IN-THE-LOOP</li><li>31 VERIFIED COMMITS</li></ul></div><a href="https://github.com/coded-devs/Atlas">View the evidence &rarr;</a></div>
+        <div class="c-work-media"><div class="atlas-mock" role="img" aria-label="Prototype visualization of Atlas schema impact analysis"><div class="atlas-mock-head"><strong>ATLAS / IMPACT TRACE</strong><span>CRITICAL</span></div><div class="atlas-mock-path"><div class="atlas-mock-node">SOURCE<br>customer_segment</div><div class="atlas-mock-node">LINEAGE<br>12 downstream assets</div><div class="atlas-mock-node">APPROVAL<br>Action required</div></div><div class="atlas-mock-report"><div class="atlas-mock-score">12</div><div><h4>DOWNSTREAM ASSETS AT RISK</h4><p>Deterministic lineage evidence prepared for human review before any execution step.</p></div></div></div></div>
+      </section>
+      <div class="c-bottom" id="c-notes">
+        <section><h2>Products beneath the headline.</h2><p>Twizrr, the school management portal and future verified work sit beneath Atlas with clear ownership, current status and proof.</p><code>NEXT: PROJECT EVIDENCE + CASE STUDIES</code></section>
+        <section><h2>Questions belong beside answers.</h2><p>Mathematics questions, scientific explorations, publications and technical notes become a first-class part of the portfolio, not an afterthought.</p><code>OPEN NOTEBOOK / SOURCED / REVISIONED</code></section>
+      </div>
+    </div>
+  </main>
+
+  <button class="assistant-toggle" type="button" aria-expanded="false" aria-controls="assistant-panel" aria-label="Ask Yusuf's AI" title="Ask Yusuf's AI"><i data-lucide="sparkles" aria-hidden="true"></i><span>Ask Yusuf's AI</span></button>
+  <aside class="assistant-panel" id="assistant-panel" hidden>
+    <div class="assistant-head"><div><strong>Yusuf's AI portfolio assistant</strong><small>Published sources only · not Yusuf · read-only</small></div><button class="assistant-close" type="button" aria-label="Close assistant">&times;</button></div>
+    <div class="assistant-body">
+      <div class="assistant-prompts" aria-label="Suggested questions">
+        <button type="button" data-prompt="work">What is Yusuf's strongest engineering work?</button>
+        <button type="button" data-prompt="ai">What has Yusuf built with AI?</button>
+        <button type="button" data-prompt="startup">What is Yusuf building as a founder?</button>
+        <button type="button" data-prompt="science">How does science fit into this portfolio?</button>
+        <button type="button" data-prompt="contact">How can I work with Yusuf?</button>
+      </div>
+      <div class="assistant-message" aria-live="polite">Select a question or ask your own. Answers link back to published portfolio evidence.<div class="assistant-sources"></div></div>
+      <form class="assistant-form"><label for="assistant-question" hidden>Ask a custom question</label><input id="assistant-question" maxlength="220" placeholder="Ask a custom question"><button type="submit" aria-label="Send question">&rarr;</button></form>
+      <p class="assistant-count">5 custom questions remaining in this rolling 24-hour period. Suggested questions do not use the allowance.</p>
+    </div>
+  </aside>
+
+  <div class="prototype-switcher" aria-label="Prototype variant switcher"><button type="button" data-direction="previous" aria-label="Previous variant">&larr;</button><span>A - Signal Lab</span><button type="button" data-direction="next" aria-label="Next variant">&rarr;</button></div>
+
+  <script>
+    const variants = [
+      { key: "A", name: "Signal Lab" },
+      { key: "B", name: "Field Notes" },
+      { key: "C", name: "Build Surface" }
+    ];
+    const params = new URLSearchParams(window.location.search);
+    const compareMode = params.get("compare") === "1";
+    const switcher = document.querySelector(".prototype-switcher");
+    switcher.hidden = !compareMode;
+    document.body.classList.toggle("compare-mode", compareMode);
+    let current = variants.findIndex((item) => item.key === (params.get("variant") || "A").toUpperCase());
+    if (current < 0) current = 0;
+    const label = switcher.querySelector("span");
+    const signalLab = document.querySelector(".variant-a");
+    const themeToggle = document.querySelector("[data-theme-toggle]");
+    const themeIcon = themeToggle.querySelector("span");
+    let signalTheme = localStorage.getItem("signal-lab-theme") || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    function applySignalTheme() {
+      signalLab.dataset.theme = signalTheme;
+      const nextTheme = signalTheme === "dark" ? "light" : "dark";
+      themeToggle.setAttribute("aria-label", "Switch to " + nextTheme + " mode");
+      themeToggle.title = "Switch to " + nextTheme + " mode";
+      themeIcon.innerHTML = signalTheme === "dark" ? "&#9728;" : "&#9790;";
+      document.body.classList.toggle("signal-light", variants[current].key === "A" && signalTheme === "light");
+    }
+    function showVariant(index) {
+      current = (index + variants.length) % variants.length;
+      document.querySelectorAll("[data-variant]").forEach((node) => { node.hidden = node.dataset.variant !== variants[current].key; });
+      label.textContent = variants[current].key + " - " + variants[current].name;
+      const next = new URL(window.location.href);
+      next.searchParams.set("variant", variants[current].key);
+      history.replaceState({}, "", next);
+      document.title = compareMode ? "Prototype " + variants[current].key + " - " + variants[current].name : "Yusuf Saheed - Engineering, Science & AI";
+      applySignalTheme();
+    }
+    document.querySelectorAll("[data-direction]").forEach((button) => button.addEventListener("click", () => showVariant(current + (button.dataset.direction === "next" ? 1 : -1))));
+    themeToggle.addEventListener("click", () => {
+      signalTheme = signalTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("signal-lab-theme", signalTheme);
+      applySignalTheme();
+    });
+    window.addEventListener("keydown", (event) => {
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (["INPUT", "TEXTAREA"].includes(tag) || document.activeElement?.isContentEditable) return;
+      if (compareMode && event.key === "ArrowRight") showVariant(current + 1);
+      if (compareMode && event.key === "ArrowLeft") showVariant(current - 1);
+    });
+    showVariant(current);
+    window.lucide?.createIcons();
+
+    async function hydrateGithubActivity() {
+      const repoCount = document.querySelector("#github-repo-count");
+      const syncState = document.querySelector("#github-sync-state");
+      try {
+        const [profileResponse, reposResponse] = await Promise.all([
+          fetch("https://api.github.com/users/SAHEED2010", { headers: { Accept: "application/vnd.github+json" } }),
+          fetch("https://api.github.com/users/SAHEED2010/repos?sort=pushed&per_page=10", { headers: { Accept: "application/vnd.github+json" } })
+        ]);
+        if (!profileResponse.ok || !reposResponse.ok) throw new Error("GitHub public API unavailable");
+        const profile = await profileResponse.json();
+        const repositories = await reposResponse.json();
+        const latest = repositories.find((repository) => !repository.fork) || repositories[0];
+        repoCount.textContent = String(profile.public_repos);
+        syncState.textContent = latest
+          ? "Live GitHub API · latest push: " + latest.name + " · " + new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(latest.pushed_at))
+          : "Live GitHub API · public profile refreshed";
+      } catch (error) {
+        syncState.textContent = "Verified fallback · 48 public repositories · Aug 18, 2026";
+      }
+    }
+    hydrateGithubActivity();
+
+    const nigeriaTime = document.querySelector("[data-nigeria-time]");
+    if (nigeriaTime) {
+      const nigeriaClock = new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", hour: "2-digit", minute: "2-digit", hour12: false });
+      function updateNigeriaTime() {
+        const now = new Date();
+        nigeriaTime.textContent = "Lagos " + nigeriaClock.format(now) + " WAT";
+        nigeriaTime.setAttribute("datetime", now.toISOString());
+      }
+      updateNigeriaTime();
+      window.setInterval(updateNigeriaTime, 30000);
+    }
+    document.querySelectorAll("[data-footer-year]").forEach((node) => { node.textContent = String(new Date().getFullYear()); });
+
+    const newsletterForm = document.querySelector("[data-newsletter-form]");
+    const newsletterStatus = newsletterForm.querySelector(".a-newsletter-status");
+    newsletterForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      newsletterStatus.textContent = "Prototype only: no email was submitted. Production signup will verify this address before activation.";
+      newsletterForm.reset();
+    });
+
+    const assistant = document.querySelector(".assistant-panel");
+    const assistantToggle = document.querySelector(".assistant-toggle");
+    const assistantClose = document.querySelector(".assistant-close");
+    const assistantMessage = document.querySelector(".assistant-message");
+    const assistantCount = document.querySelector(".assistant-count");
+    const assistantSources = document.querySelector(".assistant-sources");
+    const assistantInput = document.querySelector("#assistant-question");
+    let remaining = 5;
+    const responses = {
+      work: { text: "Atlas is the clearest verified AI engineering project today. Twizrr is the leading product candidate once Yusuf adds his exact contribution and current product evidence.", links: [{ label: "Open the work index", href: "/work" }] },
+      ai: { text: "Yusuf built all 31 visible commits in Atlas, an agent that combines AI reasoning with deterministic lineage evidence and a human approval gate.", links: [{ label: "Open Atlas evidence", href: "https://github.com/coded-devs/Atlas" }] },
+      startup: { text: "Yusuf is a CodedDevs co-founder. The portfolio presents startup work as supporting context and distinguishes Yusuf's contribution from team outcomes.", links: [{ label: "Contact Yusuf", href: "/contact" }] },
+      science: { text: "The Library brings together research, publications, mathematical questions, tutorials, videos and scientific explorations with sources and revision history.", links: [{ label: "Browse the Library", href: "/library" }] },
+      contact: { text: "Email Yusuf at yusufsaheed2012@gmail.com or use the portfolio's WhatsApp link for a project or opportunity. GitHub, LinkedIn and X are also available above.", links: [{ label: "Start a conversation", href: "/contact" }] }
+    };
+    function renderAssistant(response, boundary = false) {
+      assistantMessage.firstChild.textContent = response.text;
+      assistantSources.innerHTML = response.links.map((link) => "<a href=\"" + link.href + "\">" + link.label + " &rarr;</a>").join("");
+      const oldBoundary = assistantMessage.querySelector(".assistant-boundary");
+      if (oldBoundary) oldBoundary.remove();
+      if (boundary) { const label = document.createElement("small"); label.className = "assistant-boundary"; label.textContent = "Published sources only"; assistantMessage.appendChild(label); }
+    }
+    function setAssistant(open) {
+      assistant.hidden = !open;
+      assistantToggle.setAttribute("aria-expanded", String(open));
+      assistantToggle.hidden = open;
+      if (open) assistantClose.focus(); else assistantToggle.focus();
+    }
+    assistantToggle.addEventListener("click", () => setAssistant(assistant.hidden));
+    assistantClose.addEventListener("click", () => setAssistant(false));
+    document.querySelectorAll("[data-prompt]").forEach((button) => button.addEventListener("click", () => { renderAssistant(responses[button.dataset.prompt]); }));
+    document.querySelector(".assistant-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const question = assistantInput.value.trim();
+      if (!question) return;
+      if (remaining <= 0) { renderAssistant({ text: "Your five custom questions for this rolling 24-hour period are used. Suggested questions remain available; the allowance resets automatically.", links: [] }); return; }
+      remaining -= 1;
+      const blocked = /password|private|draft|admin|login|secret|message/i.test(question);
+      renderAssistant({ text: blocked ? "I can only discuss Yusuf's published portfolio and approved public sources. I cannot expose private material, drafts, credentials, or account actions." : "This prototype records the interaction. The production assistant will answer this question only from Yusuf-approved sources and include supporting links.", links: blocked ? [] : [{ label: "Explore published work", href: "/work" }] }, blocked);
+      assistantCount.textContent = remaining + " custom question" + (remaining === 1 ? "" : "s") + " remaining in this rolling 24-hour period";
+      assistantInput.value = "";
+    });
+    document.querySelectorAll("[data-route]").forEach((button) => button.addEventListener("click", () => {
+      document.querySelectorAll("[data-route]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+    }));
+  </script>
+</body>
+</html>

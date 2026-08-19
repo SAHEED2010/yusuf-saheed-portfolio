@@ -1,0 +1,1 @@
+export default function UnsubscribePage() { return <section className="detail"><p className="eyebrow">Newsletter preferences</p><h1>Stop future notifications.</h1><p className="lede">The production route will accept a signed unsubscribe link without requiring an account and will provide a clear re-subscribe path.</p></section>; }
