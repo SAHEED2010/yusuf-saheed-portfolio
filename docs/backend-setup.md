@@ -18,7 +18,6 @@ Copy `.env.example` to `.env.local` and fill these values:
 - `AI_MODEL` and `AI_BASE_URL`: optional provider-neutral overrides. Provider-specific model/key variables are `XAI_MODEL`/`XAI_API_KEY`, `OPENAI_MODEL`/`OPENAI_API_KEY`, and `ANTHROPIC_MODEL`/`ANTHROPIC_API_KEY`
 - `MCP_SERVER_TOKEN`: a long random bearer token used by ChatGPT, Claude, or another MCP client to access `/api/mcp`
 - `MCP_ALLOWED_ORIGIN`: exact web origin allowed to call the MCP endpoint, or `*` for clients that do not send browser origins
-- `MCP_PUBLISH_CONFIRMATION`: a separate phrase required for a publish tool call; draft creation never publishes
 - `NEWSLETTER_PROVIDER`: `none` until a provider is approved; use `resend` with `RESEND_API_KEY` and `RESEND_FROM` after domain setup
 
 Generate a password digest with PowerShell:
@@ -33,7 +32,7 @@ Generate a session secret with:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
 ```
 
-The admin dashboard is available at `/admin` after the environment is configured. The MCP endpoint is `/api/mcp`; local desktop clients can use `npm run mcp` over stdio. Never put provider keys or `MCP_SERVER_TOKEN` in browser code or committed files.
+The admin dashboard is available at `/admin` after the environment is configured. The MCP endpoint is `/api/mcp`; local desktop clients can use `npm run mcp` over stdio. An authenticated MCP client may create drafts, update settings, and publish validated records directly. Never put provider keys or `MCP_SERVER_TOKEN` in browser code or committed files.
 
 The database module uses `@libsql/client` for both local `file:` SQLite and hosted Turso. Schema migrations run automatically when the server first connects. Vercel's ephemeral filesystem must not be used as the production content database, so production must use `DATABASE_PROVIDER=turso` with both Turso connection values configured.
 
