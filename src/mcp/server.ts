@@ -15,12 +15,14 @@ function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
-const projectFields = {
+export const projectFields = {
   title: z.string().min(1).optional(), summary: z.string().min(1).optional(), role: z.string().min(1).optional(), body: z.array(z.string()).optional(), tags: z.array(z.string()).optional(),
   templateData: z.record(z.string(), z.unknown()).optional(), linkUrl: z.string().url().optional(), evidenceLabel: z.string().optional(), evidenceUrl: z.string().url().optional(),
 };
 
-function createProject(input: { slug: string; title: string; summary: string; role: string; body: string[]; tags: string[]; templateData: ProjectData; linkUrl?: string; evidenceLabel?: string; evidenceUrl?: string; publish: boolean }): ProjectRecord {
+export type ProjectUpdateInput = { newSlug?: string; } & z.infer<z.ZodObject<typeof projectFields>>;
+
+export function createProject(input: { slug: string; title: string; summary: string; role: string; body: string[]; tags: string[]; templateData: ProjectData; linkUrl?: string; evidenceLabel?: string; evidenceUrl?: string; publish: boolean }): ProjectRecord {
   const now = new Date().toISOString();
   return {
     id: `mcp-${slugify(input.slug)}-${randomBytes(4).toString("hex")}`, slug: slugify(input.slug), contentType: "project", title: input.title.trim(), summary: input.summary.trim(), body: input.body,
@@ -29,7 +31,7 @@ function createProject(input: { slug: string; title: string; summary: string; ro
   };
 }
 
-function updateProject(record: ProjectRecord, input: { newSlug?: string } & z.infer<z.ZodObject<typeof projectFields>>): ProjectRecord {
+export function updateProject(record: ProjectRecord, input: ProjectUpdateInput): ProjectRecord {
   const primaryLink = record.links[0];
   const primaryEvidence = record.evidence[0];
   return {

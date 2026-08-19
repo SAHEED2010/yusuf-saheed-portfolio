@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Yusuf Saheed mark</title>
+  <desc id="desc">A Y and S monogram with a rising signal line.</desc>
+  <rect width="128" height="128" rx="22" fill="#111719"/>
+  <path d="M27 29 49 55v44M71 29 49 55" fill="none" stroke="#46b8b0" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/>
+  <path d="M74 35c14-8 28-1 28 10 0 9-7 13-18 16-11 3-17 7-17 16 0 12 16 20 34 8" fill="none" stroke="#f7faf8" stroke-linecap="round" stroke-width="9"/>
+  <path d="M77 91h25" stroke="#ffdd00" stroke-linecap="round" stroke-width="6"/>
+</svg>

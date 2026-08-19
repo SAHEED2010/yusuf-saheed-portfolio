@@ -29,7 +29,8 @@ main { width: 100%; }
 .skip-link:focus { transform: translateY(0); }
 .site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
 .wordmark { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 700; }
-.wordmark b { display: grid; place-items: center; width: 36px; height: 36px; color: #fff; background: var(--green); font: 600 13px/1 "IBM Plex Mono", monospace; }
+.wordmark-mark { display: block; width: 36px; height: 36px; flex: 0 0 36px; }
+.wordmark-mark img { width: 36px; height: 36px; }
 .primary-nav { display: flex; align-items: center; gap: 24px; font-size: 13px; }
 .primary-nav a { color: var(--text); text-decoration: none; }
 .primary-nav a:hover { color: var(--green); }
@@ -173,6 +174,14 @@ main { width: 100%; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; }
 .checkbox-label input { width: auto; min-height: 0; }
 .form-status { min-height: 18px; color: var(--yellow); font: 500 12px/1.5 "IBM Plex Mono", monospace; }
+.admin-manager { margin-top: 32px; padding: 24px; background: var(--surface); border: 1px solid var(--line); }
+.admin-manager-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.admin-manager-head h2 { margin: 5px 0 0; font: 600 26px/1.1 Syne, Arial, sans-serif; }
+.admin-manager-form { display: grid; gap: 12px; margin-top: 18px; }
+.admin-manager-form textarea { width: 100%; min-height: 140px; padding: 13px 14px; color: var(--text); background: var(--surface); border: 1px solid var(--line); font: inherit; resize: vertical; }
+.admin-manager-form button { min-height: 44px; width: fit-content; padding: 0 16px; color: #071412; background: var(--teal); border: 0; font-weight: 800; cursor: pointer; }
+.admin-manager-form button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-manager-result { min-height: 34px; max-height: 320px; overflow: auto; margin: 18px 0 0; padding: 14px; color: var(--muted); background: var(--bg); white-space: pre-wrap; font: 500 12px/1.55 "IBM Plex Mono", monospace; }
 @media (max-width: 800px) {
   .site-shell { width: min(var(--max), calc(100% - 32px)); }
   .site-header { align-items: center; flex-wrap: wrap; gap: 14px 18px; padding: 14px 0; }
