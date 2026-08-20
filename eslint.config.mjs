@@ -1,9 +1,10 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 const config = [
-  { ignores: [".next/**", "node_modules/**", "public/**", ".scratch/**", ".data/**", "next-env.d.ts"] },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextCoreWebVitals,
+  ...nextTypeScript,
+  { ignores: [".scratch/**", ".data/**", "public/**"] },
   { rules: {
     "react/no-unescaped-entities": "off",
     "@next/next/no-img-element": "off",

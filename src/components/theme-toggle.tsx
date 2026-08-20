@@ -9,7 +9,8 @@ export function ThemeToggle() {
     const saved = localStorage.getItem("signal-lab-theme");
     const next = saved === "dark" || saved === "light" ? saved : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     document.documentElement.dataset.theme = next;
-    setLight(next === "light");
+    const timer = window.setTimeout(() => setLight(next === "light"), 0);
+    return () => window.clearTimeout(timer);
   }, []);
   function toggle() {
     const next = light ? "dark" : "light";

@@ -15,7 +15,13 @@ export function FloatingAssistant() {
   const [question, setQuestion] = useState("");
   const [remaining, setRemaining] = useState(5);
   const [answer, setAnswer] = useState<VisitorAnswer>(initialAnswer);
-  useEffect(() => { const stored = Number(sessionStorage.getItem(allowanceStorageKey())); if (Number.isFinite(stored) && stored >= 0 && stored <= 5) setRemaining(stored); }, []);
+  useEffect(() => {
+    const stored = Number(sessionStorage.getItem(allowanceStorageKey()));
+    if (Number.isFinite(stored) && stored >= 0 && stored <= 5) {
+      const timer = window.setTimeout(() => setRemaining(stored), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
   async function ask(value: string, custom = false) {
     if (custom && remaining <= 0) { setAnswer({ text: "Your five custom questions for this rolling 24-hour period are used. Suggested questions remain available; the allowance resets automatically.", links: [] }); return; }
     try {
