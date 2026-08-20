@@ -17,7 +17,10 @@ export function VisitorAssistant() {
 
   useEffect(() => {
     const stored = Number(sessionStorage.getItem(allowanceStorageKey()));
-    if (Number.isFinite(stored) && stored >= 0 && stored <= 5) setRemaining(stored);
+    if (Number.isFinite(stored) && stored >= 0 && stored <= 5) {
+      const timer = window.setTimeout(() => setRemaining(stored), 0);
+      return () => window.clearTimeout(timer);
+    }
   }, []);
 
   function ask(value: string, custom = false) {
