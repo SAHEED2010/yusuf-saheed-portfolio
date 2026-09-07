@@ -26,6 +26,8 @@ export type SiteSettings = {
   locationLabel: string;
   locationUrl: string;
   whatsappMessage: string;
+  footerNote: string;
+  navigation: { id: string; label: string; href: string; enabled: boolean }[];
   socialLinks: SocialLink[];
   updatedAt: string;
 };
@@ -33,20 +35,30 @@ export type SiteSettings = {
 export const defaultSiteSettings: SiteSettings = {
   name: "Yusuf Saheed",
   identity: "Engineering, Science & AI",
-  heroTitle: "Yusuf Saheed builds systems for the",
-  heroAccent: "real world.",
-  heroSummary: "Software engineer, AI builder, scientific explorer and CodedDevs co-founder turning difficult ideas into useful products, practical research and knowledge other people can build on.",
-  heroImageUrl: "",
+  heroTitle: "Software that works where the",
+  heroAccent: "infrastructure doesn't.",
+  heroSummary:
+    "Cofounder and CTO at Codedevs, building production web and AI products from Lagos — escrow-backed payments, WhatsApp commerce, and AI agents that show their reasoning before they act. Four hackathon podiums, including first place at the Africa's Talking BuildWithAI Pan-African finals.",
+  heroImageUrl: "/yusuf-portrait.jpeg",
   heroImageAlt: "Portrait of Yusuf Saheed",
-  opportunityNote: "Open to engineering roles, collaborations, research, startup work and technology problems worth solving.",
+  opportunityNote:
+    "Open to internships, junior engineering roles and freelance contracts — and to founders who need a technical partner.",
   connectHeading: "Find the work. Reach the person.",
-  connectSummary: "Every route opens the real profile or contact channel.",
+  connectSummary: "Every route opens a real profile or contact channel.",
   email: "yusufsaheed2012@gmail.com",
   phone: "+2348106249995",
   supportUrl: "https://buymeacoffee.com/yusufsaheed",
   locationLabel: "Lagos, Nigeria",
   locationUrl: "https://www.google.com/maps/search/?api=1&query=Lagos%2C%20Nigeria",
   whatsappMessage: "Hello Yusuf, I found your portfolio and would like to discuss a technology project or opportunity with you.",
+  footerNote: "Built in Lagos for a global audience.",
+  navigation: [
+    { id: "work", label: "Work", href: "/work", enabled: true },
+    { id: "library", label: "Library", href: "/library", enabled: true },
+    { id: "achievements", label: "Achievements", href: "/achievements", enabled: true },
+    { id: "about", label: "About", href: "/about", enabled: true },
+    { id: "contact", label: "Work with me", href: "/contact", enabled: true },
+  ],
   socialLinks: [
     { id: "github", label: "GitHub", url: "https://github.com/SAHEED2010", icon: "github", enabled: true },
     { id: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/yusuf-saheed123/", icon: "linkedin", enabled: true },

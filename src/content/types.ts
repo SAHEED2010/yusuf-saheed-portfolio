@@ -20,6 +20,7 @@ export type ContentRecord = {
   id: string;
   slug: string;
   contentType: ContentType;
+  recordKind: "collection" | "entry";
   title: string;
   summary: string;
   body: string[];

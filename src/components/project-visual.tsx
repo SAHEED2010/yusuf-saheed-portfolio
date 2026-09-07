@@ -1,7 +1,7 @@
 import type { ProjectData, ProjectRecord } from "@/content/types";
 
 function shorten(value: string, length = 88) {
-  return value.length > length ? `${value.slice(0, length - 1).trimEnd()}...` : value;
+  return value.length > length ? `${value.slice(0, length - 1).trimEnd()}…` : value;
 }
 
 function templateLabel(data: ProjectData) {
@@ -53,7 +53,7 @@ export function ProjectVisual({ project }: { project: ProjectRecord }) {
   const proofLabel = verifiedCount > 0 ? `${verifiedCount} verified source${verifiedCount === 1 ? "" : "s"}` : "Editorial review required";
 
   return <div className="system-visual" role="img" aria-label={`${project.title} project record visualization`}>
-    <div className="system-visual-head"><strong>{templateLabel(project.templateData)} / RECORD</strong><span>{project.templateData.template === "product-system" ? project.templateData.status : project.lifecycle}</span></div>
+    <div className="system-visual-head"><strong>{templateLabel(project.templateData)} / RECORD</strong><span>{shorten(project.templateData.template === "product-system" ? project.templateData.status : project.lifecycle, 42)}</span></div>
     <div className="system-path">{signals.map((signal) => <div key={signal.label}><small>{signal.label}</small><strong>{shorten(signal.value || "Not supplied")}</strong></div>)}</div>
     <div className="system-report"><div className="system-score">{evidenceCount || "--"}</div><div><h4>{evidenceLabel.toUpperCase()}</h4><p>{proofLabel}. {project.role || "Contribution details are being prepared."}</p></div></div>
   </div>;

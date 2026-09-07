@@ -1,7 +1,7 @@
 export const suggestedQuestions = [
-  "What is Atlas?",
   "What does Yusuf build?",
-  "Which work is verified?",
-  "How can Yusuf help a team?",
-  "What is coming next?",
+  "What did he do on Twizrr?",
+  "What is Atlas?",
+  "What has he won?",
+  "Is he available for work?",
 ];

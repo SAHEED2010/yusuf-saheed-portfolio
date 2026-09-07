@@ -15,6 +15,14 @@ export async function getIndexItems(type?: ContentType): Promise<AnyContentRecor
   return (await readAllRecords()).filter((item) => isPublished(item) && (!type || item.contentType === type)).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+export async function getLibraryCollections(): Promise<AnyContentRecord[]> {
+  return (await getIndexItems()).filter((item) => item.contentType !== "project" && item.recordKind === "collection");
+}
+
+export async function getLibraryEntries(type: ContentType): Promise<AnyContentRecord[]> {
+  return (await getIndexItems(type)).filter((item) => item.contentType !== "project" && item.recordKind === "entry");
+}
+
 export async function getAdminItems() {
   return await readAllRecords();
 }

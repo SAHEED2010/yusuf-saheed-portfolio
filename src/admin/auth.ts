@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 const cookieName = "yusuf-admin-session";
@@ -12,7 +12,7 @@ function signature(value: string) {
 }
 
 export function adminConfigurationReady() {
-  return Boolean(process.env.PORTFOLIO_ADMIN_EMAIL && process.env.PORTFOLIO_ADMIN_PASSWORD_SHA256 && secret());
+  return Boolean(process.env.PORTFOLIO_ADMIN_EMAIL && (process.env.PORTFOLIO_ADMIN_PASSWORD_SCRYPT || process.env.PORTFOLIO_ADMIN_PASSWORD_SHA256) && secret());
 }
 
 export function passwordDigest(password: string) {
@@ -21,11 +21,19 @@ export function passwordDigest(password: string) {
 
 export function credentialsMatch(email: string, password: string) {
   const configuredEmail = process.env.PORTFOLIO_ADMIN_EMAIL ?? "";
+  const configuredScrypt = process.env.PORTFOLIO_ADMIN_PASSWORD_SCRYPT?.trim() ?? "";
   const configuredDigest = process.env.PORTFOLIO_ADMIN_PASSWORD_SHA256 ?? "";
-  const digest = passwordDigest(password);
   const emailMatches = email.trim().toLowerCase() === configuredEmail.trim().toLowerCase();
-  const digestMatches = digest.length === configuredDigest.length && timingSafeEqual(Buffer.from(digest), Buffer.from(configuredDigest));
-  return emailMatches && digestMatches;
+  if (!emailMatches) return false;
+  if (configuredScrypt) {
+    const [salt, expectedHex] = configuredScrypt.split(":");
+    if (!salt || !expectedHex || !/^[a-f0-9]+$/i.test(expectedHex)) return false;
+    const expected = Buffer.from(expectedHex, "hex");
+    const received = scryptSync(password, salt, expected.length);
+    return received.length === expected.length && timingSafeEqual(received, expected);
+  }
+  const digest = passwordDigest(password);
+  return digest.length === configuredDigest.length && timingSafeEqual(Buffer.from(digest), Buffer.from(configuredDigest));
 }
 
 export function createSession(email: string) {

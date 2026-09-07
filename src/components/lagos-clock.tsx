@@ -11,5 +11,5 @@ export function LagosClock() {
     const timer = window.setInterval(update, 30_000);
     return () => window.clearInterval(timer);
   }, []);
-  return <time dateTime={new Date().toISOString()} className="time-label">{value}</time>;
+  return <time className="time-label">{value}</time>;
 }

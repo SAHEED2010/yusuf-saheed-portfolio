@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getIndexItems, getPreview } from "@/content/store";
+
+export const metadata: Metadata = {
+  title: "Work",
+  description: "Selected systems by Yusuf Saheed — Twizrr, Atlas, Swifta, DialAI and Hardware-OS, each with the evidence and his exact contribution attached.",
+};
 
 export default async function WorkPage() {
   const items = await getIndexItems("project");

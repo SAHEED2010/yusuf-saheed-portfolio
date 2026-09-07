@@ -15,6 +15,7 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
     {query.saved && <p className="form-status">Settings saved.</p>}
     {query.error && <p className="form-status">{query.error}</p>}
     <form className="admin-form admin-record" action="/api/admin/settings" method="post">
+      <label>Public name<input name="name" defaultValue={settings.name} required /></label>
       <label>Identity<input name="identity" defaultValue={settings.identity} required /></label>
       <label>Hero title<input name="heroTitle" defaultValue={settings.heroTitle} required /></label>
       <label>Hero accent<input name="heroAccent" defaultValue={settings.heroAccent} required /></label>
@@ -30,6 +31,8 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
       <label>Location label<input name="locationLabel" defaultValue={settings.locationLabel} required /></label>
       <label>Location URL<input name="locationUrl" type="url" defaultValue={settings.locationUrl} required /></label>
       <label>Buy Me a Coffee URL<input name="supportUrl" type="url" defaultValue={settings.supportUrl} required /></label>
+      <label>Footer note<input name="footerNote" defaultValue={settings.footerNote} required /></label>
+      <fieldset><legend>Navigation</legend>{settings.navigation.map((link) => <div className="settings-link-row" key={link.id}><strong>{link.id}</strong><div className="settings-link-fields"><input aria-label={`${link.id} label`} name={`navLabel_${link.id}`} defaultValue={link.label} /><input aria-label={`${link.id} destination`} name={`navHref_${link.id}`} defaultValue={link.href} /></div><label className="checkbox-label"><input type="checkbox" name={`navEnabled_${link.id}`} defaultChecked={link.enabled} /> Visible</label></div>)}</fieldset>
       <fieldset>
         <legend>Social and contact routes</legend>
         {settings.socialLinks.map((link) => <div className="settings-link-row" key={link.id}>

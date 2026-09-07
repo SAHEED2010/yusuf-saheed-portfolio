@@ -28,6 +28,7 @@ function serialize(record: AnyContentRecord) {
     id: record.id,
     slug: record.slug,
     content_type: record.contentType,
+    record_kind: record.recordKind,
     title: record.title,
     summary: record.summary,
     body_json: JSON.stringify(record.body),
@@ -48,7 +49,7 @@ function serialize(record: AnyContentRecord) {
 
 function hydrate(row: Row): AnyContentRecord {
   const base = {
-    id: String(row.id), slug: String(row.slug), contentType: row.content_type as AnyContentRecord["contentType"],
+    id: String(row.id), slug: String(row.slug), contentType: row.content_type as AnyContentRecord["contentType"], recordKind: (row.record_kind === "collection" ? "collection" : "entry") as "collection" | "entry",
     title: String(row.title), summary: String(row.summary), body: JSON.parse(String(row.body_json)),
     visibility: row.visibility as AnyContentRecord["visibility"], lifecycle: row.lifecycle as AnyContentRecord["lifecycle"],
     featured: Boolean(row.featured), sortOrder: Number(row.sort_order), publishedAt: row.published_at ? String(row.published_at) : undefined,
@@ -72,9 +73,25 @@ async function initialize(db: Client) {
       { sql: "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", args: [1, new Date().toISOString()] },
     ]);
   }
+  if (process.env.PORTFOLIO_REQUIRE_DURABLE_DB?.trim().toLowerCase() === "true") throw new Error("Production requires DATABASE_PROVIDER=turso with durable database credentials");
+  if (!applied.has(2)) {
+    await db.migrate([
+      "ALTER TABLE content_records ADD COLUMN record_kind TEXT NOT NULL DEFAULT 'entry'",
+      "UPDATE content_records SET record_kind = 'collection' WHERE id IN ('library-tutorials', 'library-research', 'library-questions', 'library-resources', 'library-achievements')",
+      { sql: "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", args: [2, new Date().toISOString()] },
+    ]);
+  }
+  if (!applied.has(3)) {
+    await db.migrate([
+      "CREATE TABLE IF NOT EXISTS newsletter_subscribers (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, status TEXT NOT NULL, token_hash TEXT, token_expires_at INTEGER, consent_text_version TEXT NOT NULL, consented_at TEXT NOT NULL, verified_at TEXT, unsubscribed_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+      { sql: "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", args: [3, new Date().toISOString()] },
+    ]);
+  }
   const count = Number((await db.execute("SELECT COUNT(*) AS count FROM content_records")).rows[0]?.count ?? 0);
   if (count === 0) {
-    await db.batch([...projects, ...library].map((record) => ({ sql: `INSERT INTO content_records (id, slug, content_type, title, summary, body_json, visibility, lifecycle, featured, sort_order, published_at, updated_at, role, tags_json, links_json, evidence_json, sources_json, template_data_json) VALUES (:id, :slug, :content_type, :title, :summary, :body_json, :visibility, :lifecycle, :featured, :sort_order, :published_at, :updated_at, :role, :tags_json, :links_json, :evidence_json, :sources_json, :template_data_json)`, args: serialize(record) })));
+    await db.batch([...projects, ...library].map((record) => ({ sql: `INSERT INTO content_records (id, slug, content_type, record_kind, title, summary, body_json, visibility, lifecycle, featured, sort_order, published_at, updated_at, role, tags_json, links_json, evidence_json, sources_json, template_data_json) VALUES (:id, :slug, :content_type, :record_kind, :title, :summary, :body_json, :visibility, :lifecycle, :featured, :sort_order, :published_at, :updated_at, :role, :tags_json, :links_json, :evidence_json, :sources_json, :template_data_json)`, args: serialize(record) })));
+  } else {
+    await db.batch(library.map((record) => ({ sql: `INSERT OR IGNORE INTO content_records (id, slug, content_type, record_kind, title, summary, body_json, visibility, lifecycle, featured, sort_order, published_at, updated_at, role, tags_json, links_json, evidence_json, sources_json, template_data_json) VALUES (:id, :slug, :content_type, :record_kind, :title, :summary, :body_json, :visibility, :lifecycle, :featured, :sort_order, :published_at, :updated_at, :role, :tags_json, :links_json, :evidence_json, :sources_json, :template_data_json)`, args: serialize(record) })));
   }
   if (!(await db.execute("SELECT key FROM site_settings WHERE key = 'site'")).rows.length) {
     await db.execute({ sql: "INSERT INTO site_settings (key, value_json, updated_at) VALUES ('site', ?, ?)", args: [JSON.stringify(defaultSiteSettings), defaultSiteSettings.updatedAt] });
@@ -97,7 +114,7 @@ export function closeDatabase() {
 export async function readSiteSettings(): Promise<SiteSettings> {
   const row = (await (await getDatabase()).execute("SELECT value_json FROM site_settings WHERE key = 'site'")).rows[0];
   if (!row?.value_json) return defaultSiteSettings;
-  try { const parsed = JSON.parse(String(row.value_json)) as Partial<SiteSettings>; return { ...defaultSiteSettings, ...parsed, socialLinks: parsed.socialLinks ?? defaultSiteSettings.socialLinks }; } catch { return defaultSiteSettings; }
+  try { const parsed = JSON.parse(String(row.value_json)) as Partial<SiteSettings>; const heroSummary = parsed.heroSummary?.includes("CodedDevs co-founder") ? defaultSiteSettings.heroSummary : parsed.heroSummary; return { ...defaultSiteSettings, ...parsed, heroSummary: heroSummary ?? defaultSiteSettings.heroSummary, heroImageUrl: parsed.heroImageUrl || defaultSiteSettings.heroImageUrl, socialLinks: parsed.socialLinks ?? defaultSiteSettings.socialLinks, navigation: parsed.navigation ?? defaultSiteSettings.navigation }; } catch { return defaultSiteSettings; }
 }
 
 export async function writeSiteSettings(settings: SiteSettings, summary: string) {
@@ -136,7 +153,7 @@ export async function readRecord(slug: string) { const row = (await (await getDa
 
 export async function writeRecord(record: AnyContentRecord, action: string, summary: string) {
   const db = await getDatabase(); const values = serialize(record); const updatedAt = new Date().toISOString();
-  await db.batch([{ sql: `INSERT INTO content_records (id, slug, content_type, title, summary, body_json, visibility, lifecycle, featured, sort_order, published_at, updated_at, role, tags_json, links_json, evidence_json, sources_json, template_data_json) VALUES (:id, :slug, :content_type, :title, :summary, :body_json, :visibility, :lifecycle, :featured, :sort_order, :published_at, :updated_at, :role, :tags_json, :links_json, :evidence_json, :sources_json, :template_data_json) ON CONFLICT(id) DO UPDATE SET slug=:slug, content_type=:content_type, title=:title, summary=:summary, body_json=:body_json, visibility=:visibility, lifecycle=:lifecycle, featured=:featured, sort_order=:sort_order, published_at=:published_at, updated_at=:updated_at, role=:role, tags_json=:tags_json, links_json=:links_json, evidence_json=:evidence_json, sources_json=:sources_json, template_data_json=:template_data_json`, args: values }, { sql: "INSERT INTO audit_entries (record_id, action, summary, created_at) VALUES (?, ?, ?, ?)", args: [record.id, action, summary, updatedAt] }], "write");
+    await db.batch([{ sql: `INSERT INTO content_records (id, slug, content_type, record_kind, title, summary, body_json, visibility, lifecycle, featured, sort_order, published_at, updated_at, role, tags_json, links_json, evidence_json, sources_json, template_data_json) VALUES (:id, :slug, :content_type, :record_kind, :title, :summary, :body_json, :visibility, :lifecycle, :featured, :sort_order, :published_at, :updated_at, :role, :tags_json, :links_json, :evidence_json, :sources_json, :template_data_json) ON CONFLICT(id) DO UPDATE SET slug=:slug, content_type=:content_type, record_kind=:record_kind, title=:title, summary=:summary, body_json=:body_json, visibility=:visibility, lifecycle=:lifecycle, featured=:featured, sort_order=:sort_order, published_at=:published_at, updated_at=:updated_at, role=:role, tags_json=:tags_json, links_json=:links_json, evidence_json=:evidence_json, sources_json=:sources_json, template_data_json=:template_data_json`, args: values }, { sql: "INSERT INTO audit_entries (record_id, action, summary, created_at) VALUES (?, ?, ?, ?)", args: [record.id, action, summary, updatedAt] }], "write");
 }
 
 export async function changeLifecycle(id: string, lifecycle: Lifecycle) {
