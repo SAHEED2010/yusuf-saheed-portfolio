@@ -29,7 +29,7 @@ Before production use, set a strong `PORTFOLIO_SESSION_SECRET`, an admin passwor
 
 ## Admin and AI
 
-The admin login uses `PORTFOLIO_ADMIN_EMAIL`, `PORTFOLIO_ADMIN_PASSWORD_SHA256`, and `PORTFOLIO_SESSION_SECRET`. Use `/admin` to manage the public profile and projects, and `/admin/assistant` to ask the configured AI provider for whitelisted operations.
+The admin login uses `PORTFOLIO_ADMIN_EMAIL`, `PORTFOLIO_ADMIN_PASSWORD_SCRYPT`, and `PORTFOLIO_SESSION_SECRET`. Use `/admin` to manage the public profile and projects, and `/admin/assistant` to ask the configured AI provider for whitelisted operations.
 
 For Grok, set `AI_PROVIDER=xai`, `XAI_API_KEY`, and the exact `XAI_MODEL` available in the xAI console. OpenAI and Anthropic can be selected with their corresponding provider and model variables. No key or model is fabricated by the application.
 
@@ -37,19 +37,21 @@ The MCP server is deliberately protected. Set `MCP_SERVER_TOKEN` before exposing
 
 For production, set `PORTFOLIO_REQUIRE_DURABLE_DB=true` and configure Turso/libSQL. The repository contains only empty environment placeholders; add real credentials to a local ignored `.env.local` or the deployment secret store.
 
-Use `PORTFOLIO_ADMIN_PASSWORD_SCRYPT` for the administrator password in `salt:keyHex` format. `PORTFOLIO_ADMIN_PASSWORD_SHA256` remains only as a compatibility fallback for an existing setup.
+The administrator password is stored as scrypt in `salt:keyHex` format. Generate it with `npm run admin:hash -- "your-password"` and paste the output into `PORTFOLIO_ADMIN_PASSWORD_SCRYPT`. Fast digests such as SHA-256 are not accepted: they have too little computational effort to resist offline brute force.
 
 ## Deployment (Vercel)
 
 The site is deployment-ready on Vercel with no environment variables at all — every public page renders from the seeded content in `src/content/seed.ts`. Variables only switch on optional features.
+
+**Recommended — import from GitHub (no CLI):** sign in at <https://vercel.com/new> with GitHub, import `SAHEED2010/yusuf-saheed-portfolio`, and deploy `master`. Next.js is detected automatically and the build command is `npm run build`. Every later push to `master` redeploys, and pull requests get preview URLs.
+
+**CLI alternative**, if you prefer it:
 
 ```powershell
 npm install -g vercel
 vercel login
 vercel --prod
 ```
-
-Alternatively, import `SAHEED2010/yusuf-saheed-portfolio` at <https://vercel.com/new> and deploy `master`. Next.js is detected automatically; the build command is `npm run build`.
 
 Set `NEXT_PUBLIC_SITE_URL` to the deployed origin immediately after the first deploy, then redeploy. Canonical URLs, the sitemap, Open Graph tags and newsletter verification links all derive from it.
 

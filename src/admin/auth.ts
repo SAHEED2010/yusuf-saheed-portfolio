@@ -1,4 +1,4 @@
-import { createHash, createHmac, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 const cookieName = "yusuf-admin-session";
@@ -12,28 +12,21 @@ function signature(value: string) {
 }
 
 export function adminConfigurationReady() {
-  return Boolean(process.env.PORTFOLIO_ADMIN_EMAIL && (process.env.PORTFOLIO_ADMIN_PASSWORD_SCRYPT || process.env.PORTFOLIO_ADMIN_PASSWORD_SHA256) && secret());
-}
-
-export function passwordDigest(password: string) {
-  return createHash("sha256").update(password).digest("hex");
+  return Boolean(process.env.PORTFOLIO_ADMIN_EMAIL && process.env.PORTFOLIO_ADMIN_PASSWORD_SCRYPT && secret());
 }
 
 export function credentialsMatch(email: string, password: string) {
   const configuredEmail = process.env.PORTFOLIO_ADMIN_EMAIL ?? "";
   const configuredScrypt = process.env.PORTFOLIO_ADMIN_PASSWORD_SCRYPT?.trim() ?? "";
-  const configuredDigest = process.env.PORTFOLIO_ADMIN_PASSWORD_SHA256 ?? "";
-  const emailMatches = email.trim().toLowerCase() === configuredEmail.trim().toLowerCase();
-  if (!emailMatches) return false;
-  if (configuredScrypt) {
-    const [salt, expectedHex] = configuredScrypt.split(":");
-    if (!salt || !expectedHex || !/^[a-f0-9]+$/i.test(expectedHex)) return false;
-    const expected = Buffer.from(expectedHex, "hex");
-    const received = scryptSync(password, salt, expected.length);
-    return received.length === expected.length && timingSafeEqual(received, expected);
-  }
-  const digest = passwordDigest(password);
-  return digest.length === configuredDigest.length && timingSafeEqual(Buffer.from(digest), Buffer.from(configuredDigest));
+  if (email.trim().toLowerCase() !== configuredEmail.trim().toLowerCase()) return false;
+  // scrypt only. A fast digest such as SHA-256 has too little computational
+  // effort to protect a password against offline brute force.
+  if (!configuredScrypt) return false;
+  const [salt, expectedHex] = configuredScrypt.split(":");
+  if (!salt || !expectedHex || !/^[a-f0-9]+$/i.test(expectedHex)) return false;
+  const expected = Buffer.from(expectedHex, "hex");
+  const received = scryptSync(password, salt, expected.length);
+  return received.length === expected.length && timingSafeEqual(received, expected);
 }
 
 export function createSession(email: string) {
