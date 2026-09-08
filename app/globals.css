@@ -295,3 +295,8 @@ main { width: 100%; }
 .cal-legend i[data-level="3"] { background: var(--cal-3); }
 .cal-legend i[data-level="4"] { background: var(--cal-4); }
 .cal-legend span { margin: 0 4px; }
+.faq { margin: 20px 0 0; }
+.faq div { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.faq div:last-child { border-bottom: 0; }
+.faq dt { margin: 0; font: 600 18px/1.35 Syne, Arial, sans-serif; }
+.faq dd { margin: 9px 0 0; color: var(--muted); font-size: 16px; line-height: 1.65; }
