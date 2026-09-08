@@ -1,5 +1,9 @@
 import { readIntegrationSnapshot, writeIntegrationSnapshot } from "@/content/database";
 
+export type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
+export type ContributionWeek = { days: ContributionDay[] };
+export type ContributionCalendar = { total: number; weeks: ContributionWeek[] };
+
 export type GithubSnapshot = {
   username: string;
   profileUrl: string;
@@ -8,6 +12,7 @@ export type GithubSnapshot = {
   followers: number | null;
   stars: number | null;
   lastPushedAt: string | null;
+  calendar: ContributionCalendar | null;
   refreshedAt: string;
   state: "verified" | "stale" | "unavailable";
   tokenConfigured: boolean;
@@ -46,6 +51,30 @@ function summarizeRepos(repos: RepoSummary[]) {
   return { stars, lastPushedAt };
 }
 
+// Maps raw daily counts onto five intensity levels. Thresholds are derived
+// from the busiest day so the grid stays readable for any contribution volume
+// rather than saturating or looking empty at a fixed scale.
+function buildCalendar(total: number, weeks: { contributionDays?: { date?: string; contributionCount?: number }[] }[]): ContributionCalendar {
+  const counts = weeks.flatMap((week) => (week.contributionDays ?? []).map((day) => day.contributionCount ?? 0));
+  const busiest = Math.max(1, ...counts);
+  const level = (count: number): ContributionDay["level"] => {
+    if (count <= 0) return 0;
+    const ratio = count / busiest;
+    if (ratio <= 0.25) return 1;
+    if (ratio <= 0.5) return 2;
+    if (ratio <= 0.75) return 3;
+    return 4;
+  };
+  return {
+    total,
+    weeks: weeks.map((week) => ({
+      days: (week.contributionDays ?? [])
+        .filter((day): day is { date: string; contributionCount?: number } => typeof day.date === "string")
+        .map((day) => ({ date: day.date, count: day.contributionCount ?? 0, level: level(day.contributionCount ?? 0) })),
+    })),
+  };
+}
+
 export async function getGithubSnapshot(): Promise<GithubSnapshot> {
   const { username, token } = config();
   const cached = await readIntegrationSnapshot<GithubSnapshot>(cacheKey);
@@ -74,13 +103,22 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
       // Repository aggregation is optional; the profile figures still stand.
     }
 
+    // The contribution calendar is only exposed through the authenticated
+    // GraphQL API, so without a token both the yearly total and the daily grid
+    // stay null and their UI is omitted rather than faked.
     let contributions: number | null = null;
+    let calendar: ContributionCalendar | null = null;
     if (token) {
-      const contributionResponse = await fetch("https://api.github.com/graphql", { method: "POST", headers: { ...headers(token), "content-type": "application/json" }, body: JSON.stringify({ query: "query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions}}}}", variables: { login: username } }), cache: "no-store" });
+      const query = `query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions weeks{contributionDays{date contributionCount}}}}}}`;
+      const contributionResponse = await fetch("https://api.github.com/graphql", { method: "POST", headers: { ...headers(token), "content-type": "application/json" }, body: JSON.stringify({ query, variables: { login: username } }), cache: "no-store" });
       if (contributionResponse.ok) {
-        const payload = await contributionResponse.json() as { data?: { user?: { contributionsCollection?: { contributionCalendar?: { totalContributions?: number } } } } };
-        const total = payload.data?.user?.contributionsCollection?.contributionCalendar?.totalContributions;
+        const payload = await contributionResponse.json() as {
+          data?: { user?: { contributionsCollection?: { contributionCalendar?: { totalContributions?: number; weeks?: { contributionDays?: { date?: string; contributionCount?: number }[] }[] } } } };
+        };
+        const raw = payload.data?.user?.contributionsCollection?.contributionCalendar;
+        const total = raw?.totalContributions;
         contributions = typeof total === "number" ? total : null;
+        if (Array.isArray(raw?.weeks) && typeof total === "number") calendar = buildCalendar(total, raw.weeks);
       }
     }
 
@@ -92,6 +130,7 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
       followers: typeof profile.followers === "number" ? profile.followers : null,
       stars,
       lastPushedAt,
+      calendar,
       refreshedAt: new Date().toISOString(),
       state: "verified",
       tokenConfigured: Boolean(token),
@@ -100,6 +139,6 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
     return snapshot;
   } catch {
     if (cached && cached.value.username === username) return { ...cached.value, state: "stale", tokenConfigured: Boolean(token) };
-    return { username, profileUrl: `https://github.com/${username}`, publicRepos: null, contributions: null, followers: null, stars: null, lastPushedAt: null, refreshedAt: new Date().toISOString(), state: "unavailable", tokenConfigured: Boolean(token) };
+    return { username, profileUrl: `https://github.com/${username}`, publicRepos: null, contributions: null, followers: null, stars: null, lastPushedAt: null, calendar: null, refreshedAt: new Date().toISOString(), state: "unavailable", tokenConfigured: Boolean(token) };
   }
 }
