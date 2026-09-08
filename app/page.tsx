@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FloatingAssistant } from "@/components/floating-assistant";
 import { BrandIcon } from "@/components/brand-icon";
 import { NewsletterSignup } from "@/components/newsletter-signup";
+import { GithubPanel } from "@/components/github-panel";
 import { getIndexItems } from "@/content/store";
 import { getGithubSnapshot } from "@/integrations/github";
 import { getWakatimeSnapshot } from "@/integrations/wakatime";
@@ -32,30 +33,10 @@ export default async function HomePage() {
     (item) => item.contentType === "achievement" && item.tags.some((tag) => /place$/.test(tag)),
   ).length;
 
-  // Integration-backed figures only appear once the integration actually
-  // returns a value. A tile reading "Unavailable" looks broken to a visitor.
+  // The strip under the hero carries portfolio facts. Live GitHub and WakaTime
+  // figures have their own panel further down, so they are not repeated here.
+  const projectCount = records.filter((item) => item.contentType === "project").length;
   const stats: { value: string; label: string; note: string }[] = [];
-  if (github.contributions !== null && github.contributions !== undefined) {
-    stats.push({
-      value: String(github.contributions),
-      label: "GitHub contributions",
-      note: "Server-synced contribution calendar · refreshed hourly",
-    });
-  }
-  if (github.publicRepos !== null && github.publicRepos !== undefined) {
-    stats.push({
-      value: String(github.publicRepos),
-      label: "Public repositories",
-      note: github.state === "stale" ? "Last verified snapshot" : "Server-synced from the public GitHub profile",
-    });
-  }
-  if (wakatime.hours !== null && wakatime.hours !== undefined) {
-    stats.push({
-      value: `${wakatime.hours}h`,
-      label: "WakaTime / 7 days",
-      note: `Server-synced activity · refreshed ${wakatime.refreshedAt.slice(0, 10)}`,
-    });
-  }
   if (podiums > 0) {
     stats.push({
       value: String(podiums),
@@ -63,6 +44,15 @@ export default async function HomePage() {
       note: "Including 1st place at the Africa's Talking BuildWithAI Pan-African finals",
     });
   }
+  if (projectCount > 0) {
+    stats.push({
+      value: String(projectCount),
+      label: "Documented systems",
+      note: "Each with the contribution and evidence stated",
+    });
+  }
+  stats.push({ value: "2025", label: "First commit", note: "Shipping production payment flows by mid-2026" });
+
   const whatsappFallback = `https://wa.me/${site.phone.replace(/\D/g, "")}?text=${encodeURIComponent(site.whatsappMessage)}`;
   const socialLinks = site.socialLinks.filter((link) => link.enabled && (link.url || link.id === "whatsapp"));
   return <>
@@ -72,6 +62,7 @@ export default async function HomePage() {
       <section className="home-connect" aria-label="Contact and social links"><div className="home-connect-copy"><strong>{site.connectHeading}</strong><p>{site.connectSummary}</p><p className="home-opportunity">{site.opportunityNote}</p></div><div className="contact-icons">{socialLinks.map((link) => <a className={link.icon === "buymeacoffee" ? "contact-support" : undefined} href={link.id === "whatsapp" && !link.url ? whatsappFallback : link.url} aria-label={link.label} title={link.label} key={link.id}>{link.logoUrl ? <img src={link.logoUrl} alt="" aria-hidden="true" width="21" height="21" /> : <BrandIcon icon={link.icon} />}</a>)}</div></section>
       <section className="home-section" id="work"><div className="section-heading"><h2>Selected systems and useful work.</h2><p>Claims are connected to repositories, live demonstrations and Yusuf&apos;s exact contribution.</p></div>{project ? <article className="featured-project"><ProjectVisual project={project} /><div className="featured-copy"><div><small>FEATURED {project.templateData.template.replaceAll("-", " ").toUpperCase()}</small><h3>{project.title}</h3><p>{project.summary}</p><ul><li>{project.role || "Contribution being documented"}</li>{project.tags.slice(0, 2).map((tag) => <li key={tag}>{tag}</li>)}{project.evidence.length > 0 && <li>{project.evidence.length} evidence item{project.evidence.length === 1 ? "" : "s"} attached</li>}</ul></div><Link href={`/work/${project.slug}`}>Open project evidence →</Link></div></article> : <div className="empty-featured">No featured project is published yet.</div>}{otherProjects.length > 0 && <div className="project-grid home-project-grid">{otherProjects.map((item) => <article className="project-card" key={item.slug}><p className="meta">{item.tags.slice(0, 2).join(" · ")}</p><h3>{item.title}</h3><p>{item.summary}</p><p className="meta">{item.role}</p><Link href={`/work/${item.slug}`}>View case study &rarr;</Link></article>)}</div>}<p className="home-work-more"><Link href="/work">See all {otherProjects.length + (project ? 1 : 0)} projects &rarr;</Link></p></section>
       {collections.length > 0 && <section className="home-section" id="library"><div className="section-heading"><h2>A Library for learning in public.</h2><p>Technical guidance, scientific questions and hard-earned lessons sit beside the projects that produced them.</p></div><div className="library-rows">{collections.map((row) => { const count = entries.filter((entry) => entry.contentType === row.contentType).length; return <Link className="library-row" href={`/library/${row.contentType}/${row.slug}`} key={row.slug}><code>LIBRARY / {row.contentType.toUpperCase()}</code><div><h3>{row.title}</h3><p>{row.summary}</p></div><span>{count} published entr{count === 1 ? "y" : "ies"}</span></Link>; })}</div></section>}
+      <GithubPanel github={github} wakatime={wakatime} />
       <section className="home-impact" id="impact"><h2>Build deeply. Learn openly. Create <span>useful impact.</span></h2><div className="impact-copy"><p>I work with teams, founders and organizations that need thoughtful technology, and I share what I learn for people finding their way into engineering, science and AI.</p><Link href="/contact">Discuss a project or opportunity</Link></div></section>
       <NewsletterSignup />
       <a className="support-float" href={site.supportUrl} aria-label="Support Yusuf&apos;s work" title="Support Yusuf&apos;s work"><BrandIcon icon="buymeacoffee" size={22} /><span>Support my work</span></a>

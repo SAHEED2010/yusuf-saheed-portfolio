@@ -59,7 +59,7 @@ Set `NEXT_PUBLIC_SITE_URL` to the deployed origin immediately after the first de
 
 | Variable | Effect if unset |
 | --- | --- |
-| `GITHUB_TOKEN` | The contribution-calendar tile is hidden. Public repository count still works. |
+| `GITHUB_TOKEN` | The yearly contribution total is hidden. Repository count, followers, stars and last-push date still work unauthenticated. Set it: the contribution total is the most valuable figure on the GitHub panel, and a token also raises the API rate limit from 60 to 5,000 requests an hour. A classic token with no scopes is enough for public data. |
 | `WAKATIME_API_KEY` | The WakaTime tile is hidden. |
 | `AI_PROVIDER` + key + model | The assistant runs in preview mode with scripted answers and says so on screen. |
 | `RESEND_API_KEY` + `RESEND_FROM` | Subscribers are stored but no verification email is sent; the form says delivery is still being set up. |
