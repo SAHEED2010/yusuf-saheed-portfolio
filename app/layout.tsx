@@ -38,6 +38,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: "Yusuf Saheed | Engineering, Science & AI", description, creator: "@yusufsaheed01" },
   robots: { index: true, follow: true },
+  // Google Search Console also accepts a meta tag. Both methods are present so
+  // verification survives if the static file is ever moved or the public
+  // directory is restructured.
+  verification: { google: "google7053849608879c50.html" },
 };
 export const dynamic = "force-dynamic";
 
