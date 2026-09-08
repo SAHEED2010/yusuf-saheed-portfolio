@@ -183,6 +183,16 @@ main { width: 100%; }
 .admin-manager-form button { min-height: 44px; width: fit-content; padding: 0 16px; color: #071412; background: var(--teal); border: 0; font-weight: 800; cursor: pointer; }
 .admin-manager-form button:disabled { cursor: not-allowed; opacity: .55; }
 .admin-manager-result { min-height: 34px; max-height: 320px; overflow: auto; margin: 18px 0 0; padding: 14px; color: var(--muted); background: var(--bg); white-space: pre-wrap; font: 500 12px/1.55 "IBM Plex Mono", monospace; }
+.gh-panel { padding: 46px 0; border-top: 1px solid var(--line); }
+.gh-panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.gh-panel-head h2 { margin: 6px 0 0; font: 600 36px/1.05 Syne, Arial, sans-serif; }
+.gh-profile-link { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; padding: 0 14px; color: var(--text); border: 1px solid var(--line); text-decoration: none; font-weight: 700; font-size: 14px; }
+.gh-profile-link:hover { color: var(--green); border-color: var(--green); }
+.gh-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; margin-top: 26px; background: var(--line); border: 1px solid var(--line); }
+.gh-figures div { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--bg); }
+.gh-figures strong { color: var(--text); font: 600 32px/1 Syne, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.gh-figures span { color: var(--green); font: 600 11px/1.35 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.gh-panel .provenance { margin-top: 24px; font-size: 13px; }
 .home-project-grid { margin-top: 18px; }
 .home-project-grid h3 { margin: 8px 0; font: 600 24px/1.15 Syne, Arial, sans-serif; }
 .home-project-grid .project-card a { color: var(--green); font-weight: 700; text-decoration: none; }
@@ -239,6 +249,12 @@ main { width: 100%; }
   .site-footer { display: block; padding-bottom: 42px; }
   .footer-brand, .footer-nav, .footer-actions { margin-bottom: 18px; justify-content: flex-start; }
   .footer-meta { display: block; }
+  .gh-panel { padding: 36px 0; }
+  .gh-panel-head { align-items: flex-start; }
+  .gh-panel-head h2 { font-size: 30px; }
+  .gh-figures { grid-template-columns: repeat(2, 1fr); margin-top: 22px; }
+  .gh-figures div { padding: 16px; }
+  .gh-figures strong { font-size: 26px; }
   .project-grid, .library-grid { grid-template-columns: 1fr; }
   .settings-link-row { grid-template-columns: 1fr; }
   .detail, .admin-panel, .assistant-surface { padding: 60px 0; }
