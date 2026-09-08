@@ -1,4 +1,5 @@
-import type { ProjectData, ProjectRecord } from "./types";
+import type { AnyContentRecord, ProjectData, ProjectRecord } from "./types";
+import type { SiteSettings } from "./settings";
 
 const required = (value: unknown, label: string, errors: string[]) => {
   if (typeof value !== "string" || value.trim().length === 0) errors.push(`${label} is required`);
@@ -9,6 +10,22 @@ function validUrl(value: string, label: string, errors: string[]) {
     const url = new URL(value);
     if (!["http:", "https:", "mailto:"].includes(url.protocol)) errors.push(`${label} must use http, https, or mailto`);
   } catch { errors.push(`${label} must be a valid URL`); }
+}
+
+export function validateSiteSettings(settings: SiteSettings): string[] {
+  const errors: string[] = [];
+  required(settings.identity, "identity", errors);
+  required(settings.heroTitle, "hero title", errors);
+  required(settings.heroAccent, "hero accent", errors);
+  required(settings.email, "email", errors);
+  if (!/^\S+@\S+\.\S+$/.test(settings.email)) errors.push("email must be valid");
+  for (const [label, value] of [["hero image URL", settings.heroImageUrl], ["location URL", settings.locationUrl], ["support URL", settings.supportUrl]] as const) if (value && !(label === "hero image URL" && value.startsWith("/"))) validUrl(value, label, errors);
+  for (const link of settings.socialLinks) if (link.url) validUrl(link.url, `${link.label} URL`, errors);
+  for (const link of settings.navigation) {
+    required(link.label, "navigation label", errors);
+    if (!link.href.startsWith("/")) validUrl(link.href, `${link.label} navigation URL`, errors);
+  }
+  return errors;
 }
 
 export function validateProject(project: ProjectRecord): string[] {
@@ -51,6 +68,25 @@ export function validateProject(project: ProjectRecord): string[] {
       required(data.date, "achievement date", errors);
       required(data.whatIsProven, "what is proven", errors);
       break;
+    default:
+      errors.push("project template is not supported");
   }
+  return errors;
+}
+
+export function validateContent(record: AnyContentRecord): string[] {
+  const errors: string[] = [];
+  required(record.title, "title", errors);
+  required(record.slug, "slug", errors);
+  required(record.summary, "summary", errors);
+  for (const link of record.links) {
+    required(link.label, "link label", errors);
+    validUrl(link.url, "link URL", errors);
+  }
+  for (const evidence of record.evidence) {
+    required(evidence.label, "evidence label", errors);
+    if (evidence.url) validUrl(evidence.url, "evidence URL", errors);
+  }
+  if (record.contentType === "project") errors.push(...validateProject(record).filter((error) => !errors.includes(error)));
   return errors;
 }

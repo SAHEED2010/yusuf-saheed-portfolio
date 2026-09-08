@@ -53,7 +53,7 @@ main { width: 100%; }
 .hero-image-slot::before, .hero-image-slot::after { content: ""; position: absolute; pointer-events: none; }
 .hero-image-slot::before { inset: 12% 18%; border: 1px solid #31423e; }
 .hero-image-slot::after { top: 50%; left: 10%; right: 10%; height: 1px; background: #25332f; transform: rotate(-18deg); }
-.home-stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.home-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .home-stat { min-height: 136px; display: flex; flex-direction: column; justify-content: center; padding: 22px; border-right: 1px solid var(--line); }
 .home-stat:last-child { border-right: 0; }
 .home-stat strong { color: var(--text); font: 600 36px/1 Syne, Arial, sans-serif; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -97,11 +97,12 @@ main { width: 100%; }
 .featured-copy a { align-self: flex-start; color: var(--green); text-decoration: none; font-weight: 700; }
 .empty-featured { min-height: 220px; display: grid; place-items: center; padding: 28px; color: var(--soft); border: 1px solid var(--line); background: var(--surface); text-align: center; }
 .library-rows { border-top: 1px solid var(--line); }
-.library-row { min-height: 126px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 160px; gap: 28px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.library-row { min-height: 126px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 160px; gap: 28px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
 .library-row code { color: var(--green); font: 600 11px/1.4 "IBM Plex Mono", monospace; }
 .library-row h3 { margin: 0 0 7px; font: 600 24px/1.2 Syne, Arial, sans-serif; }
 .library-row p { max-width: 650px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
 .library-row span { justify-self: end; color: var(--green); font: 600 10px/1.4 "IBM Plex Mono", monospace; text-align: right; text-transform: uppercase; }
+.library-row:hover h3, .library-row:focus-visible h3 { color: var(--green); }
 .home-impact { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 70px; align-items: flex-end; padding: 74px 0; border-top: 1px solid var(--line); }
 .impact-copy p { margin: 0 0 24px; color: var(--muted); font-size: 16px; line-height: 1.7; }
 .impact-copy a { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; color: #111719; background: var(--yellow); text-decoration: none; font-weight: 700; }
@@ -182,14 +183,28 @@ main { width: 100%; }
 .admin-manager-form button { min-height: 44px; width: fit-content; padding: 0 16px; color: #071412; background: var(--teal); border: 0; font-weight: 800; cursor: pointer; }
 .admin-manager-form button:disabled { cursor: not-allowed; opacity: .55; }
 .admin-manager-result { min-height: 34px; max-height: 320px; overflow: auto; margin: 18px 0 0; padding: 14px; color: var(--muted); background: var(--bg); white-space: pre-wrap; font: 500 12px/1.55 "IBM Plex Mono", monospace; }
+.home-project-grid { margin-top: 18px; }
+.home-project-grid h3 { margin: 8px 0; font: 600 24px/1.15 Syne, Arial, sans-serif; }
+.home-project-grid .project-card a { color: var(--green); font-weight: 700; text-decoration: none; }
+.home-project-grid .project-card a:hover { text-decoration: underline; }
+.home-work-more { margin: 20px 0 0; }
+.home-work-more a { color: var(--green); font-weight: 700; text-decoration: none; }
+.home-work-more a:hover { text-decoration: underline; }
+.about-list { display: grid; gap: 28px; margin: 20px 0 0; padding: 0; list-style: none; }
+.about-list h3 { margin: 6px 0 8px; font: 600 21px/1.25 Syne, Arial, sans-serif; }
+.about-list h3 span { color: var(--green); }
+.about-list .body { margin: 0; color: var(--muted); font-size: 17px; }
+.about-skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px 32px; margin: 20px 0 0; }
+.about-skills dt { color: var(--green); font: 700 11px/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.about-skills dd { margin: 7px 0 0; color: var(--muted); font-size: 16px; }
 @media (max-width: 800px) {
   .site-shell { width: min(var(--max), calc(100% - 32px)); }
   .site-header { align-items: center; flex-wrap: wrap; gap: 14px 18px; padding: 14px 0; }
   .wordmark { min-width: 0; }
   .wordmark span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .primary-nav { width: 100%; flex-wrap: wrap; gap: 10px 14px; font-size: 12px; }
-  .primary-nav .time-label { margin-left: auto; }
-  .header-contact { min-height: 36px; padding: 0 12px; }
+  .primary-nav { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; font-size: 12px; }
+  .primary-nav .time-label { grid-column: 1 / -1; }
+  .header-contact { min-height: 36px; padding: 0 12px; grid-column: 1 / -1; justify-content: center; }
   .home-hero { grid-template-columns: 1fr; gap: 36px; padding-top: 48px; }
   .home-hero h1 { font-size: 50px; }
   .home-portrait { min-height: 0; }
@@ -220,7 +235,7 @@ main { width: 100%; }
   .support-float { left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); display: inline-flex; min-height: 48px; padding: 0 14px; font-size: 12px; }
   .assistant-toggle { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); width: 48px; min-height: 48px; display: grid; place-items: center; padding: 0; }
   .assistant-toggle span { display: none; }
-  .assistant-panel { right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .assistant-panel { right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 104px); }
   .site-footer { display: block; padding-bottom: 42px; }
   .footer-brand, .footer-nav, .footer-actions { margin-bottom: 18px; justify-content: flex-start; }
   .footer-meta { display: block; }

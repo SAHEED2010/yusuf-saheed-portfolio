@@ -6,6 +6,8 @@ import { createPortfolioMcpServer } from "../src/mcp/server.ts";
 process.env.DATABASE_PROVIDER = "sqlite";
 process.env.PORTFOLIO_DATABASE_PATH = "file::memory:";
 process.env.MCP_SERVER_TOKEN = "mcp-smoke-token";
+process.env.MCP_ALLOW_DIRECT_PUBLISH = "true";
+process.env.MCP_ALLOW_SETTINGS_MUTATION = "true";
 
 const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 const server = createPortfolioMcpServer();
@@ -32,4 +34,6 @@ try {
   delete process.env.DATABASE_PROVIDER;
   delete process.env.PORTFOLIO_DATABASE_PATH;
   delete process.env.MCP_SERVER_TOKEN;
+  delete process.env.MCP_ALLOW_DIRECT_PUBLISH;
+  delete process.env.MCP_ALLOW_SETTINGS_MUTATION;
 }

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Work with me",
+  description: "Reach Yusuf Saheed by email, WhatsApp or social — open to internships, junior engineering roles and freelance contracts.",
+};
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();

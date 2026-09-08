@@ -7,7 +7,7 @@ The portfolio backend is a Next.js App Router server with SQLite persistence, si
 Copy `.env.example` to `.env.local` and fill these values:
 
 - `PORTFOLIO_ADMIN_EMAIL`: `yusufsaheed2012@gmail.com`
-- `PORTFOLIO_ADMIN_PASSWORD_SHA256`: SHA-256 digest of the admin password
+- `PORTFOLIO_ADMIN_PASSWORD_SCRYPT`: scrypt hash of the admin password as `salt:keyHex` (generate with `npm run admin:hash -- "your-password"`)
 - `PORTFOLIO_SESSION_SECRET`: long random secret used to sign the session cookie
 - `GITHUB_USERNAME`: `SAHEED2010` unless the public profile changes
 - `GITHUB_TOKEN`: optional server-only token; required for contribution calendar data

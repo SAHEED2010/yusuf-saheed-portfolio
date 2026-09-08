@@ -20,8 +20,9 @@ export function getRuntimeConfig(): RuntimeConfig {
   const mcpMissing = required({ MCP_SERVER_TOKEN: process.env.MCP_SERVER_TOKEN });
   const newsletterProvider = process.env.NEWSLETTER_PROVIDER?.trim().toLowerCase() === "resend" ? "resend" : "none";
   const newsletterMissing = newsletterProvider === "resend" ? required({ RESEND_API_KEY: process.env.RESEND_API_KEY, RESEND_FROM: process.env.RESEND_FROM }) : [];
+  const durableRequired = process.env.PORTFOLIO_REQUIRE_DURABLE_DB?.trim().toLowerCase() === "true";
   return {
-    database: { provider: databaseProvider, ready: databaseProvider === "sqlite" || required(databaseValues).length === 0, missing: required(databaseValues) },
+    database: { provider: databaseProvider, ready: !durableRequired && databaseProvider === "sqlite" || databaseProvider === "turso" && required(databaseValues).length === 0, missing: durableRequired && databaseProvider === "sqlite" ? ["DATABASE_PROVIDER=turso"] : required(databaseValues) },
     ai: { provider: aiProvider, ready: aiProvider === "none" || aiMissing.length === 0, missing: aiMissing, model: aiModel },
     mcp: { ready: mcpMissing.length === 0, missing: mcpMissing },
     newsletter: { provider: newsletterProvider, ready: newsletterProvider === "none" || newsletterMissing.length === 0, missing: newsletterMissing },
