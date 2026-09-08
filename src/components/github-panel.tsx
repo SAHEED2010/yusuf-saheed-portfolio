@@ -1,6 +1,7 @@
 import type { GithubSnapshot } from "@/integrations/github";
 import type { WakatimeSnapshot } from "@/integrations/wakatime";
 import { BrandIcon } from "@/components/brand-icon";
+import { ContributionCalendarGrid } from "@/components/contribution-calendar";
 
 function relativeDay(iso: string | null) {
   if (!iso) return null;
@@ -23,7 +24,7 @@ export function GithubPanel({ github, wakatime }: { github: GithubSnapshot; waka
 
   // Nothing verifiable came back, so the panel stays off rather than showing
   // empty tiles or a decorative placeholder.
-  if (figures.length === 0) return null;
+  if (figures.length === 0 && !github.calendar) return null;
 
   const lastPush = relativeDay(github.lastPushedAt);
 
@@ -50,6 +51,8 @@ export function GithubPanel({ github, wakatime }: { github: GithubSnapshot; waka
           ))}
         </div>
       )}
+
+      {github.calendar && github.calendar.weeks.length > 0 && <ContributionCalendarGrid calendar={github.calendar} />}
 
       <p className="provenance">
         Fetched from the GitHub API and cached hourly — not a badge image.
