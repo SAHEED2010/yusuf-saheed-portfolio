@@ -247,7 +247,12 @@ main { width: 100%; }
   .library-row span { display: block; margin-top: 14px; text-align: left; }
   .featured-copy { padding: 22px; }
   .featured-copy h3 { font-size: 32px; }
-  .support-float { left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); display: inline-flex; min-height: 48px; padding: 0 14px; font-size: 12px; }
+  /* The floating support button crowds the small-screen viewport alongside the
+     assistant toggle, and it overlays content while scrolling. Buy Me a Coffee
+     stays reachable from the footer on every page, the homepage contact icons,
+     and the contact page, so the floating copy is dropped here rather than
+     shrunk. */
+  .support-float { display: none; }
   .assistant-toggle { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); width: 48px; min-height: 48px; display: grid; place-items: center; padding: 0; }
   .assistant-toggle span { display: none; }
   .assistant-panel { right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 104px); }
