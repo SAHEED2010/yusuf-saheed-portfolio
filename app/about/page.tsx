@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getIndexItems } from "@/content/store";
 import { getSiteSettings } from "@/lib/site";
+import { breadcrumbSchema, faq, faqSchema, jsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: "About",
@@ -71,6 +72,16 @@ export default async function AboutPage() {
 
   return (
     <section className="detail">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(faqSchema())} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about" },
+          ]),
+        )}
+      />
       <p className="eyebrow">About</p>
       <h1>Thirteen months from first commit to production payment flows.</h1>
       <p className="lede">{site.heroSummary}</p>
@@ -123,6 +134,18 @@ export default async function AboutPage() {
             <div key={skill.group}>
               <dt>{skill.group}</dt>
               <dd>{skill.items}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="detail-section">
+        <h2>Common questions</h2>
+        <dl className="faq">
+          {faq.map((item) => (
+            <div key={item.question}>
+              <dt>{item.question}</dt>
+              <dd>{item.answer}</dd>
             </div>
           ))}
         </dl>

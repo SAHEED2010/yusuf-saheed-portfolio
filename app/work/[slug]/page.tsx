@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCaseStudy, getPublished } from "@/content/store";
+import { breadcrumbSchema, jsonLd, projectSchema } from "@/lib/structured-data";
 import type { ProjectData } from "@/content/types";
 
 function ProjectDetails({ data }: { data: ProjectData }) {
@@ -30,8 +31,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const item = await getPublished(slug);
   if (!item || item.contentType !== "project") notFound();
   const project = getCaseStudy(item);
+  const schema = projectSchema(project);
+  const crumbs = breadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Work", path: "/work" },
+    { name: project.title, path: `/work/${project.slug}` },
+  ]);
   const data = project.templateData;
-  return <article className="detail">
+  return <article className="detail"><script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema)} /><script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(crumbs)} />
     <p className="eyebrow">{data.template.replaceAll("-", " ")}</p><h1>{project.title}</h1><p className="lede">{project.summary}</p><p className="provenance">{project.role}</p>
     {project.body.map((paragraph) => <p className="body" key={paragraph}>{paragraph}</p>)}
     <section className="detail-section"><h2>What this record says</h2><ProjectDetails data={data} /></section>
