@@ -10,9 +10,12 @@ declare global {
   var __portfolioDatabasePromise: Promise<Client> | undefined;
 }
 
+function selectedProvider() {
+  return process.env.DATABASE_PROVIDER?.trim().toLowerCase() === "turso" ? "turso" : "sqlite";
+}
+
 function databaseConfig() {
-  const provider = process.env.DATABASE_PROVIDER?.trim().toLowerCase() === "turso" ? "turso" : "sqlite";
-  if (provider === "turso") {
+  if (selectedProvider() === "turso") {
     const url = process.env.TURSO_DATABASE_URL?.trim();
     const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
     if (!url || !authToken) throw new Error("DATABASE_PROVIDER=turso requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN");
@@ -73,7 +76,15 @@ async function initialize(db: Client) {
       { sql: "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", args: [1, new Date().toISOString()] },
     ]);
   }
-  if (process.env.PORTFOLIO_REQUIRE_DURABLE_DB?.trim().toLowerCase() === "true") throw new Error("Production requires DATABASE_PROVIDER=turso with durable database credentials");
+  // This flag is meant to catch a deployment that fell back to the
+  // ephemeral SQLite file (e.g. a missing Turso env var silently
+  // downgrading the provider), not to reject a correctly configured Turso
+  // setup. It checks the *resolved* provider, not just its own value, or
+  // setting it exactly as documented (alongside DATABASE_PROVIDER=turso)
+  // breaks the deployment it was meant to protect.
+  if (process.env.PORTFOLIO_REQUIRE_DURABLE_DB?.trim().toLowerCase() === "true" && selectedProvider() !== "turso") {
+    throw new Error("PORTFOLIO_REQUIRE_DURABLE_DB=true requires DATABASE_PROVIDER=turso with TURSO_DATABASE_URL and TURSO_AUTH_TOKEN configured");
+  }
   if (!applied.has(2)) {
     await db.migrate([
       "ALTER TABLE content_records ADD COLUMN record_kind TEXT NOT NULL DEFAULT 'entry'",
