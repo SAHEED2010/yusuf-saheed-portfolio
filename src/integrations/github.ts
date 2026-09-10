@@ -137,7 +137,12 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
     };
     await writeIntegrationSnapshot(cacheKey, snapshot, snapshot.refreshedAt);
     return snapshot;
-  } catch {
+  } catch (error) {
+    // Logged rather than swallowed: a silent failure here previously made the
+    // entire GitHub panel disappear from production with no way to tell why
+    // — a bad token 401s even the unauthenticated-shaped profile request, and
+    // that looked identical to "nothing configured" from the outside.
+    console.error("[github integration] snapshot fetch failed:", error instanceof Error ? error.message : error);
     if (cached && cached.value.username === username) return { ...cached.value, state: "stale", tokenConfigured: Boolean(token) };
     return { username, profileUrl: `https://github.com/${username}`, publicRepos: null, contributions: null, followers: null, stars: null, lastPushedAt: null, calendar: null, refreshedAt: new Date().toISOString(), state: "unavailable", tokenConfigured: Boolean(token) };
   }
