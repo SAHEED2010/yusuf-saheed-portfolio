@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminSession } from "@/admin/auth";
 import { getAdminItems } from "@/content/store";
+import { ReleasePanel } from "@/components/release-panel";
 import type { AnyContentRecord, Evidence, ProjectRecord } from "@/content/types";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,7 @@ function ContentForm({ record }: { record?: AnyContentRecord }) {
     <label>Display order<input name="sortOrder" type="number" min="0" defaultValue={record?.sortOrder ?? 10} /></label>
     <label className="checkbox-label"><input type="checkbox" name="featured" defaultChecked={record?.featured ?? false} /> Feature on homepage</label>
     <div className="actions"><button type="submit">{record ? "Save draft" : "Create draft"}</button>{record && record.lifecycle !== "published" ? <button type="submit" name="action" value="publish">Publish after review</button> : null}{record?.lifecycle === "published" ? <button type="submit" name="action" value="archive">Archive</button> : null}{record?.lifecycle === "archived" ? <button type="submit" name="action" value="restore">Restore draft</button> : null}</div>
+    {record && record.lifecycle === "published" && record.recordKind === "entry" ? <ReleasePanel slug={record.slug} /> : null}
   </form>;
 }
 
