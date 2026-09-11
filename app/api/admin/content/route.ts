@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { changeLifecycle, readAllRecords, writeRecord } from "@/content/database";
 import { isAdminSession, isSameOrigin } from "@/admin/auth";
 import { validateContent } from "@/content/validation";
-import type { AnyContentRecord, ContentType, ProjectData, ProjectRecord } from "@/content/types";
+import { createContentRecord, describeChange, updateContentRecord, type ContentMutationInput } from "@/content/mutations";
+import type { Evidence, ProjectData, ProjectRecord } from "@/content/types";
 
 export const runtime = "nodejs";
 
@@ -10,12 +11,34 @@ function redirect(request: Request, path: string) {
   return NextResponse.redirect(new URL(path, request.url), 303);
 }
 
-function slugify(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
-}
-
 function listValue(form: FormData, name: string) {
   return String(form.get(name) ?? "").split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
+}
+
+// "Label | https://…" per line. A line with no pipe is skipped rather than
+// guessed at, since a malformed line silently becoming a link with an empty
+// URL would fail validation with a confusing error far from its cause.
+function parseLinkLines(form: FormData): { label: string; url: string }[] {
+  return listValue(form, "links")
+    .map((line) => line.split("|").map((part) => part.trim()))
+    .filter((parts) => parts.length >= 2 && parts[1])
+    .map(([label, url]) => ({ label: label || "Link", url }));
+}
+
+// "Label | URL | level | note" per line. URL and note may be empty, but the
+// pipes must stay in place so a later segment isn't mistaken for an earlier
+// one — the form's own placeholder text says so.
+function parseEvidenceLines(form: FormData): Evidence[] {
+  const allowedLevels = ["verified", "self-reported", "in-progress"];
+  return listValue(form, "evidence")
+    .map((line) => line.split("|").map((part) => part.trim()))
+    .filter((parts) => parts[0])
+    .map(([label, url, level, note]) => ({
+      label,
+      url: url || undefined,
+      level: (allowedLevels.includes(level) ? level : "in-progress") as Evidence["level"],
+      note: note || undefined,
+    }));
 }
 
 function parseTemplateData(form: FormData, existing?: ProjectRecord): ProjectData {
@@ -28,49 +51,25 @@ function parseTemplateData(form: FormData, existing?: ProjectRecord): ProjectDat
       // Validation below reports the unsupported template instead of throwing.
     }
   }
-  return existing?.templateData ?? {
-    template: "product-system",
-    problem: String(form.get("problem") ?? "").trim(),
-    audience: String(form.get("audience") ?? "").trim(),
-    contribution: String(form.get("contribution") ?? "").trim(),
-    decisions: listValue(form, "decisions"),
-    status: String(form.get("status") ?? "Draft").trim(),
-    nextImprovement: String(form.get("nextImprovement") ?? "").trim(),
-  };
+  return existing?.templateData ?? { template: "product-system", problem: "", audience: "", contribution: "", decisions: [], status: "Draft", nextImprovement: "" };
 }
 
-function buildRecord(form: FormData, existing?: AnyContentRecord): AnyContentRecord {
-  const rawContentType = String(form.get("contentType") ?? existing?.contentType ?? "project");
-  const allowedTypes: ContentType[] = ["project", "tutorial", "research", "question", "resource", "achievement"];
-  const contentType = (allowedTypes.includes(rawContentType as ContentType) ? rawContentType : "tutorial") as ContentType;
-  const now = new Date().toISOString();
-  const linkUrl = String(form.get("linkUrl") ?? "").trim();
-  const evidenceLabel = String(form.get("evidenceLabel") ?? "").trim();
-  const evidenceUrl = String(form.get("evidenceUrl") ?? "").trim();
-  const links = [...(linkUrl ? [{ label: String(form.get("linkLabel") ?? "Primary link").trim() || "Primary link", url: linkUrl }] : []), ...(existing?.links.slice(1) ?? [])];
-  const evidence = [...(evidenceLabel ? [{ label: evidenceLabel, url: evidenceUrl || undefined, level: String(form.get("evidenceLevel") ?? "in-progress") as "verified" | "self-reported" | "in-progress", note: String(form.get("evidenceNote") ?? "").trim() || undefined }] : []), ...(existing?.evidence.slice(1) ?? [])];
-  const base = {
-    id: existing?.id ?? `content-${crypto.randomUUID()}`,
-    slug: slugify(String(form.get("slug") ?? existing?.slug ?? "")),
-    contentType,
-    recordKind: String(form.get("recordKind") ?? existing?.recordKind ?? "entry") === "collection" ? "collection" as const : "entry" as const,
-    title: String(form.get("title") ?? existing?.title ?? "").trim(),
-    summary: String(form.get("summary") ?? existing?.summary ?? "").trim(),
+function toMutationInput(form: FormData, existing?: ProjectRecord): ContentMutationInput {
+  return {
+    contentType: String(form.get("contentType") ?? existing?.contentType ?? "tutorial"),
+    recordKind: String(form.get("recordKind") ?? existing?.recordKind ?? "entry") === "collection" ? "collection" : "entry",
+    slug: String(form.get("slug") ?? "").trim() || undefined,
+    title: String(form.get("title") ?? "").trim() || undefined,
+    summary: String(form.get("summary") ?? "").trim() || undefined,
+    role: String(form.get("role") ?? "").trim() || undefined,
+    tags: String(form.get("tags") ?? "").split(",").map((tag) => tag.trim()).filter(Boolean),
     body: listValue(form, "body"),
-    visibility: existing?.visibility ?? "private" as const,
-    lifecycle: existing?.lifecycle ?? "draft" as const,
+    links: parseLinkLines(form),
+    evidence: parseEvidenceLines(form),
     featured: form.get("featured") === "on",
     sortOrder: Number(form.get("sortOrder") ?? existing?.sortOrder ?? 10),
-    publishedAt: existing?.publishedAt,
-    updatedAt: now,
-    role: String(form.get("role") ?? existing?.role ?? "").trim() || undefined,
-    tags: String(form.get("tags") ?? existing?.tags.join(", ") ?? "").split(",").map((tag) => tag.trim()).filter(Boolean),
-    links,
-    evidence,
-    sources: existing?.sources ?? [],
+    templateData: parseTemplateData(form, existing) as unknown as Record<string, unknown>,
   };
-  if (contentType === "project") return { ...base, contentType: "project", templateData: parseTemplateData(form, existing?.contentType === "project" ? existing : undefined) };
-  return base as AnyContentRecord;
 }
 
 export async function POST(request: Request) {
@@ -80,18 +79,26 @@ export async function POST(request: Request) {
   const action = String(form.get("action") ?? "save");
   const id = String(form.get("id") ?? "");
   const existing = (await readAllRecords()).find((item) => item.id === id);
+
   if (action === "publish" || action === "archive" || action === "restore") {
     if (!existing) return redirect(request, "/admin/content?error=missing");
     if (action === "publish") {
       const errors = validateContent({ ...existing, lifecycle: "published", visibility: "public" });
       if (errors.length > 0) return redirect(request, `/admin/content?error=${encodeURIComponent(errors[0])}`);
     }
-    await changeLifecycle(existing.id, action === "publish" ? "published" : action === "archive" ? "archived" : "draft");
-    return redirect(request, "/admin/content?saved=1");
+    const nextLifecycle = action === "publish" ? "published" : action === "archive" ? "archived" : "draft";
+    await changeLifecycle(existing.id, nextLifecycle);
+    const summary = describeChange(existing, { ...existing, lifecycle: nextLifecycle });
+    return redirect(request, `/admin/content?saved=1&summary=${encodeURIComponent(summary)}`);
   }
-  const candidate = buildRecord(form, existing);
+
+  const input = toMutationInput(form, existing?.contentType === "project" ? existing : undefined);
+  const candidate = existing
+    ? updateContentRecord(existing, input)
+    : createContentRecord({ ...input, slug: input.slug ?? "", title: input.title ?? "", summary: input.summary ?? "" }, false);
   const errors = validateContent(candidate);
   if (errors.length > 0) return redirect(request, `/admin/content?error=${encodeURIComponent(errors[0])}`);
   await writeRecord(candidate, existing ? "update" : "create", existing ? `Updated ${candidate.title}` : `Created ${candidate.title}`);
-  return redirect(request, "/admin/content?saved=1");
+  const summary = describeChange(existing, candidate);
+  return redirect(request, `/admin/content?saved=1&summary=${encodeURIComponent(summary)}`);
 }
