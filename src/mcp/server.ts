@@ -1,18 +1,13 @@
-import { randomBytes } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import { changeLifecycle, readAllRecords, readRecord, readSiteSettings, writeRecord, writeSiteSettings } from "@/content/database";
 import { getIndexItems } from "@/content/store";
-import { validateProject } from "@/content/validation";
-import type { ProjectData, ProjectRecord } from "@/content/types";
+import { validateContent } from "@/content/validation";
+import { contentTypes, createContentRecord, describeChange, updateContentRecord } from "@/content/mutations";
 import type { SiteSettings } from "@/content/settings";
 
 function text(value: unknown) {
   return { content: [{ type: "text" as const, text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
-}
-
-function slugify(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
 function directPublishAllowed() {
@@ -23,35 +18,24 @@ function settingsMutationAllowed() {
   return process.env.MCP_ALLOW_SETTINGS_MUTATION?.trim().toLowerCase() === "true";
 }
 
-export const projectFields = {
-  title: z.string().min(1).optional(), summary: z.string().min(1).optional(), role: z.string().min(1).optional(), body: z.array(z.string()).optional(), tags: z.array(z.string()).optional(),
-  templateData: z.record(z.string(), z.unknown()).optional(), linkUrl: z.string().url().optional(), evidenceLabel: z.string().optional(), evidenceUrl: z.string().url().optional(),
+const linkSchema = z.object({ label: z.string().min(1), url: z.string().url() });
+const evidenceSchema = z.object({ label: z.string().min(1), url: z.string().url().optional(), level: z.enum(["verified", "self-reported", "in-progress"]).default("in-progress"), note: z.string().optional() });
+
+// Shared field set for both create and update. Providing links/evidence
+// replaces the record's full list, matching the admin assistant's semantics
+// (src/content/mutations.ts) rather than only ever touching one item.
+const contentFields = {
+  title: z.string().min(1).optional(),
+  summary: z.string().min(1).optional(),
+  role: z.string().min(1).optional(),
+  body: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  links: z.array(linkSchema).optional(),
+  evidence: z.array(evidenceSchema).optional(),
+  templateData: z.record(z.string(), z.unknown()).optional(),
+  featured: z.boolean().optional(),
+  sortOrder: z.number().optional(),
 };
-
-export type ProjectUpdateInput = { newSlug?: string; } & z.infer<z.ZodObject<typeof projectFields>>;
-
-export function createProject(input: { slug: string; title: string; summary: string; role: string; body: string[]; tags: string[]; templateData: ProjectData; linkUrl?: string; evidenceLabel?: string; evidenceUrl?: string; publish: boolean }): ProjectRecord {
-  const now = new Date().toISOString();
-  return {
-    id: `mcp-${slugify(input.slug)}-${randomBytes(4).toString("hex")}`, slug: slugify(input.slug), contentType: "project", recordKind: "entry", title: input.title.trim(), summary: input.summary.trim(), body: input.body,
-    visibility: input.publish ? "public" : "private", lifecycle: input.publish ? "published" : "draft", featured: false, sortOrder: 100, updatedAt: now, publishedAt: input.publish ? now : undefined, role: input.role.trim(), tags: input.tags,
-    links: input.linkUrl ? [{ label: "Project link", url: input.linkUrl }] : [], evidence: input.evidenceLabel ? [{ label: input.evidenceLabel, url: input.evidenceUrl, level: "in-progress" }] : [], sources: [], templateData: input.templateData,
-  };
-}
-
-export function updateProject(record: ProjectRecord, input: ProjectUpdateInput): ProjectRecord {
-  const primaryLink = record.links[0];
-  const primaryEvidence = record.evidence[0];
-  return {
-    ...record,
-    slug: input.newSlug ? slugify(input.newSlug) : record.slug,
-    title: input.title?.trim() ?? record.title, summary: input.summary?.trim() ?? record.summary, role: input.role?.trim() ?? record.role,
-    body: input.body ?? record.body, tags: input.tags ?? record.tags, updatedAt: new Date().toISOString(),
-    links: input.linkUrl === undefined ? record.links : input.linkUrl ? [{ label: primaryLink?.label ?? "Project link", url: input.linkUrl }, ...record.links.slice(1)] : record.links.slice(1),
-    evidence: input.evidenceLabel === undefined && input.evidenceUrl === undefined ? record.evidence : input.evidenceLabel ? [{ label: input.evidenceLabel, url: input.evidenceUrl ?? primaryEvidence?.url, level: primaryEvidence?.level ?? "in-progress", note: primaryEvidence?.note }, ...record.evidence.slice(1)] : record.evidence,
-    templateData: input.templateData ? { ...record.templateData, ...input.templateData } as ProjectData : record.templateData,
-  };
-}
 
 export function createPortfolioMcpServer() {
   const server = new McpServer({ name: "yusuf-saheed-portfolio", version: "1.0.0" });
@@ -64,42 +48,57 @@ export function createPortfolioMcpServer() {
 
   server.registerTool("portfolio_list_content", { description: "List all structured content records, including drafts. This is an authenticated admin operation." }, async () => text(await readAllRecords()));
 
-  server.registerTool("portfolio_create_project", {
-    description: "Create a validated project. Set publish=true to publish it immediately; otherwise it remains a private draft.",
+  server.registerTool("portfolio_create_content", {
+    description: `Create a validated content record of any type (${contentTypes.join(", ")}). Set publish=true to publish it immediately; otherwise it remains a private draft. "project" additionally requires templateData shaped for one of the five project templates.`,
     inputSchema: {
-      slug: z.string().min(1), title: z.string().min(1), summary: z.string().min(1), role: z.string().min(1), body: z.array(z.string()).default([]), tags: z.array(z.string()).default([]),
-      templateData: z.record(z.string(), z.unknown()), linkUrl: z.string().url().optional(), evidenceLabel: z.string().optional(), evidenceUrl: z.string().url().optional(), publish: z.boolean().default(false),
+      ...contentFields,
+      contentType: z.enum(contentTypes as [string, ...string[]]).default("tutorial"),
+      recordKind: z.enum(["entry", "collection"]).default("entry"),
+      slug: z.string().min(1),
+      title: z.string().min(1),
+      summary: z.string().min(1),
+      publish: z.boolean().default(false),
     },
-  }, async (input) => {
-    const publish = input.publish && directPublishAllowed();
-    const candidate = createProject({ ...input, publish, templateData: input.templateData as ProjectData });
-    const errors = validateProject(candidate);
+  }, async ({ publish, ...input }) => {
+    const canPublish = publish && directPublishAllowed();
+    const candidate = createContentRecord(input, canPublish);
+    const errors = validateContent(candidate);
     if (errors.length) return text({ ok: false, errors });
-    await writeRecord(candidate, input.publish ? "mcp-create-publish" : "mcp-create-draft", `Created MCP project ${candidate.title}`);
-    return text({ ok: true, lifecycle: candidate.lifecycle, requiresConfirmation: input.publish && !publish, record: candidate });
+    await writeRecord(candidate, canPublish ? "mcp-create-publish" : "mcp-create-draft", `Created MCP ${candidate.contentType} ${candidate.title}`);
+    return text({ ok: true, lifecycle: candidate.lifecycle, requiresConfirmation: publish && !canPublish, record: candidate, summary: describeChange(undefined, candidate) });
   });
 
-  server.registerTool("portfolio_update_project", { description: "Update an existing project. Set publish=true to publish the validated result immediately.", inputSchema: { slug: z.string().min(1), newSlug: z.string().min(1).optional(), publish: z.boolean().default(false), ...projectFields } }, async ({ slug, publish, ...input }) => {
+  server.registerTool("portfolio_update_content", {
+    description: "Update an existing content record of any type. Set publish=true to publish the validated result immediately. Providing links or evidence replaces the record's entire list.",
+    inputSchema: { slug: z.string().min(1), newSlug: z.string().min(1).optional(), publish: z.boolean().default(false), ...contentFields },
+  }, async ({ slug, publish, ...input }) => {
     const record = await readRecord(slug);
-    if (!record || record.contentType !== "project") return text({ ok: false, error: "Project not found" });
-    const updated = updateProject(record, input);
+    if (!record) return text({ ok: false, error: "Record not found" });
+    const updated = updateContentRecord(record, input);
     const canPublish = publish && directPublishAllowed();
     const candidate = canPublish ? { ...updated, lifecycle: "published" as const, visibility: "public" as const } : updated;
-    const errors = validateProject(candidate);
+    const errors = validateContent(candidate);
     if (errors.length) return text({ ok: false, errors });
-    await writeRecord(candidate, canPublish ? "mcp-update-publish" : "mcp-update-draft", `Updated MCP project ${candidate.title}`);
-    return text({ ok: true, lifecycle: candidate.lifecycle, requiresConfirmation: publish && !canPublish, record: candidate });
+    await writeRecord(candidate, canPublish ? "mcp-update-publish" : "mcp-update-draft", `Updated MCP ${candidate.contentType} ${candidate.title}`);
+    return text({ ok: true, lifecycle: candidate.lifecycle, requiresConfirmation: publish && !canPublish, record: candidate, summary: describeChange(record, candidate) });
   });
 
-  server.registerTool("portfolio_publish_project", { description: "Publish an existing project immediately after validating its public evidence.", inputSchema: { slug: z.string().min(1) } }, async ({ slug }) => {
+  server.registerTool("portfolio_publish_content", { description: "Publish an existing content record immediately after validating it.", inputSchema: { slug: z.string().min(1) } }, async ({ slug }) => {
     const record = await readRecord(slug);
-    if (!record || record.contentType !== "project") return text({ ok: false, error: "Project not found" });
+    if (!record) return text({ ok: false, error: "Record not found" });
     if (!directPublishAllowed()) return text({ ok: false, requiresConfirmation: true, error: "Direct publishing is disabled. Review the draft in the admin dashboard and confirm publication there." });
     const candidate = { ...record, lifecycle: "published" as const, visibility: "public" as const };
-    const errors = validateProject(candidate);
+    const errors = validateContent(candidate);
     if (errors.length) return text({ ok: false, errors });
     await changeLifecycle(record.id, "published");
-    return text({ ok: true, slug, lifecycle: "published" });
+    return text({ ok: true, slug, lifecycle: "published", summary: describeChange(record, candidate) });
+  });
+
+  server.registerTool("portfolio_archive_content", { description: "Archive an existing content record. This never deletes it -- it can be restored later from the admin dashboard.", inputSchema: { slug: z.string().min(1) } }, async ({ slug }) => {
+    const record = await readRecord(slug);
+    if (!record) return text({ ok: false, error: "Record not found" });
+    await changeLifecycle(record.id, "archived");
+    return text({ ok: true, slug, lifecycle: "archived", summary: `Archived "${record.title}". It is no longer public and can be restored later.` });
   });
 
   server.registerTool("portfolio_update_site_settings", {
