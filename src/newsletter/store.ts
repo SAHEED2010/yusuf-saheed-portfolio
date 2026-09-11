@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getDatabase } from "@/content/database";
 
 export type SubscriptionResult = { ok: boolean; status: "pending" | "active" | "unsubscribed"; token?: string; deliveryConfigured: boolean };
@@ -9,6 +9,31 @@ function hash(value: string) {
 
 function normalized(email: string) {
   return email.trim().toLowerCase();
+}
+
+function unsubscribeSecret() {
+  return process.env.PORTFOLIO_SESSION_SECRET ?? "";
+}
+
+// The unsubscribe link is a stateless HMAC of the address, not a stored
+// one-time token. The subscriber's original signup-verification token is
+// deleted the moment they verify (verifySubscription clears token_hash), so
+// an unsubscribe link built from that same token would already be broken
+// on every release email sent after the first -- there would be no valid
+// token left to check it against, for every subscriber who ever verified.
+// A stateless signature works for as many release emails as are ever sent,
+// needs no extra database column, and never expires the way a one-time
+// verification token correctly should.
+export function unsubscribeToken(email: string): string {
+  return createHmac("sha256", unsubscribeSecret()).update(normalized(email)).digest("base64url");
+}
+
+function unsubscribeTokenValid(email: string, token: string): boolean {
+  if (!unsubscribeSecret() || !token) return false;
+  const expected = unsubscribeToken(email);
+  const a = Buffer.from(token);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 export async function createSubscription(email: string): Promise<SubscriptionResult> {
@@ -31,11 +56,20 @@ export async function verifySubscription(token: string) {
   return true;
 }
 
-export async function unsubscribe(token: string) {
+export async function unsubscribe(email: string, token: string) {
+  if (!unsubscribeTokenValid(email, token)) return false;
   const db = await getDatabase();
-  const row = (await db.execute({ sql: "SELECT id FROM newsletter_subscribers WHERE token_hash = ?", args: [hash(token)] })).rows[0];
-  if (!row?.id) return false;
+  const address = normalized(email);
+  const existing = (await db.execute({ sql: "SELECT status FROM newsletter_subscribers WHERE email = ?", args: [address] })).rows[0];
+  if (!existing) return false;
+  if (existing.status === "unsubscribed") return true; // already done -- clicking the link twice is not an error
   const now = new Date().toISOString();
-  await db.execute({ sql: "UPDATE newsletter_subscribers SET status='unsubscribed', token_hash=NULL, token_expires_at=NULL, unsubscribed_at=?, updated_at=? WHERE id=?", args: [now, now, String(row.id)] });
+  await db.execute({ sql: "UPDATE newsletter_subscribers SET status='unsubscribed', unsubscribed_at=?, updated_at=? WHERE email=?", args: [now, now, address] });
   return true;
+}
+
+export async function getActiveSubscribers(): Promise<string[]> {
+  const db = await getDatabase();
+  const rows = (await db.execute("SELECT email FROM newsletter_subscribers WHERE status = 'active'")).rows;
+  return rows.map((row) => String(row.email));
 }
