@@ -29,20 +29,36 @@ export function credentialsMatch(email: string, password: string) {
   return received.length === expected.length && timingSafeEqual(received, expected);
 }
 
+// The session token is `base64url(JSON payload).signature`. The payload is
+// base64url-encoded specifically so the token can be safely split on its one
+// literal separator: splitting a plain `email.timestamp.signature` string on
+// "." breaks for almost every real email address, because a domain like
+// gmail.com already contains a dot. That bug let a session set on a correct
+// login be rejected on the very next request, for any email with a dotted
+// domain — which is nearly all of them.
 export function createSession(email: string) {
-  const payload = `${email.trim().toLowerCase()}.${Date.now()}`;
+  const payload = Buffer.from(JSON.stringify({ email: email.trim().toLowerCase(), issuedAt: Date.now() })).toString("base64url");
   return `${payload}.${signature(payload)}`;
 }
 
 function sessionValid(value: string | undefined) {
   if (!value || !secret()) return false;
-  const parts = value.split(".");
-  if (parts.length !== 3) return false;
-  const [email, timestamp, received] = parts;
-  const age = Date.now() - Number(timestamp);
+  const separatorIndex = value.lastIndexOf(".");
+  if (separatorIndex === -1) return false;
+  const payload = value.slice(0, separatorIndex);
+  const received = value.slice(separatorIndex + 1);
+  const expected = signature(payload);
+  if (received.length !== expected.length || !timingSafeEqual(Buffer.from(received), Buffer.from(expected))) return false;
+  let decoded: { email?: unknown; issuedAt?: unknown };
+  try {
+    decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf-8"));
+  } catch {
+    return false;
+  }
+  const email = typeof decoded.email === "string" ? decoded.email : "";
+  const age = Date.now() - Number(decoded.issuedAt);
   if (!email || !Number.isFinite(age) || age < 0 || age > 1000 * 60 * 60 * 24 * 7) return false;
-  const expected = signature(`${email}.${timestamp}`);
-  return received.length === expected.length && timingSafeEqual(Buffer.from(received), Buffer.from(expected)) && email === (process.env.PORTFOLIO_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  return email === (process.env.PORTFOLIO_ADMIN_EMAIL ?? "").trim().toLowerCase();
 }
 
 export async function isAdminSession() {
