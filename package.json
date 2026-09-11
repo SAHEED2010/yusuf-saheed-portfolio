@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test:backend": "tsx scripts/backend-smoke.mjs",
+    "test:backend": "tsx scripts/backend-smoke.mjs && tsx scripts/mutations-smoke.mjs",
     "mcp": "tsx scripts/mcp-server.mjs",
     "test:mcp": "tsx scripts/mcp-smoke.mjs",
     "admin:hash": "node scripts/admin-hash.mjs"

@@ -187,6 +187,13 @@ main { width: 100%; }
 .admin-manager-form textarea { width: 100%; min-height: 140px; padding: 13px 14px; color: var(--text); background: var(--surface); border: 1px solid var(--line); font: inherit; resize: vertical; }
 .admin-manager-form button { min-height: 44px; width: fit-content; padding: 0 16px; color: #071412; background: var(--teal); border: 0; font-weight: 800; cursor: pointer; }
 .admin-manager-form button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-manager-message { margin: 0 0 10px; color: var(--text); font: 500 14px/1.5 Manrope, Arial, sans-serif; }
+.admin-manager-summary { margin: 0 0 10px; padding: 10px 12px; color: var(--text); background: var(--surface); border-left: 3px solid var(--green); font: 500 14px/1.5 Manrope, Arial, sans-serif; }
+.admin-manager-summary-pending { border-left-color: var(--yellow); }
+.admin-manager-error { margin: 0 0 10px; color: #c0392b; font: 600 14px/1.5 Manrope, Arial, sans-serif; }
+.admin-manager-raw { margin-top: 6px; }
+.admin-manager-raw summary { cursor: pointer; color: var(--soft); font: 600 11px/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.admin-manager-raw pre { margin: 8px 0 0; padding: 12px; max-height: 260px; overflow: auto; color: var(--muted); background: var(--bg); white-space: pre-wrap; font: 500 11px/1.5 "IBM Plex Mono", monospace; }
 .admin-manager-result { min-height: 34px; max-height: 320px; overflow: auto; margin: 18px 0 0; padding: 14px; color: var(--muted); background: var(--bg); white-space: pre-wrap; font: 500 12px/1.55 "IBM Plex Mono", monospace; }
 .gh-panel { padding: 46px 0; border-top: 1px solid var(--line); }
 .gh-panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
