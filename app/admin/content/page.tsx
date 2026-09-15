@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { isAdminSession } from "@/admin/auth";
 import { getAdminItems } from "@/content/store";
 import { ReleasePanel } from "@/components/release-panel";
+import { ProjectTemplateFields } from "@/components/project-template-fields";
 import type { AnyContentRecord, Evidence, ProjectRecord } from "@/content/types";
 
 export const dynamic = "force-dynamic";
@@ -35,8 +36,7 @@ function ContentForm({ record }: { record?: AnyContentRecord }) {
     <label>Role or framing<input name="role" defaultValue={record?.role ?? ""} /></label>
     <label>Tags<input name="tags" defaultValue={record?.tags.join(", ") ?? ""} placeholder="research, learning" /></label>
     <label>Body paragraphs<textarea name="body" defaultValue={record?.body.join("\n") ?? ""} placeholder="One paragraph per line" /></label>
-    <label>Project template JSON<textarea name="templateData" defaultValue={project ? JSON.stringify(project.templateData, null, 2) : JSON.stringify({ template: "product-system", problem: "", audience: "", contribution: "", decisions: [], status: "Draft", nextImprovement: "" }, null, 2)} /></label>
-    <p className="provenance">Used when content type is project. Choose product systems, research experiments, tools, team/startup work, or achievement milestones. The server validates required fields before publishing.</p>
+    <ProjectTemplateFields initial={project?.templateData} />
     <label>
       Links (one per line: label | URL)
       <textarea name="links" defaultValue={record ? linksToLines(record.links) : ""} placeholder="Repository | https://github.com/…" />

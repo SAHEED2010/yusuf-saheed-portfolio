@@ -41,17 +41,29 @@ function parseEvidenceLines(form: FormData): Evidence[] {
     }));
 }
 
+// Reads the pd_* fields written by src/components/project-template-fields.tsx.
+// The template picker there always submits pd_template, so this only falls
+// back to the existing record (or a blank product-system) when the form
+// field is genuinely missing -- never by guessing at partial input.
 function parseTemplateData(form: FormData, existing?: ProjectRecord): ProjectData {
-  const raw = String(form.get("templateData") ?? "").trim();
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as ProjectData;
-      if (parsed && typeof parsed === "object") return parsed;
-    } catch {
-      // Validation below reports the unsupported template instead of throwing.
-    }
+  const field = (name: string) => String(form.get(`pd_${name}`) ?? "").trim();
+  const list = (name: string) => listValue(form, `pd_${name}`);
+  const template = String(form.get("pd_template") ?? "");
+
+  switch (template) {
+    case "product-system":
+      return { template: "product-system", problem: field("problem"), audience: field("audience"), contribution: field("contribution"), decisions: list("decisions"), status: field("status") || "Draft", nextImprovement: field("nextImprovement") };
+    case "research-experiment":
+      return { template: "research-experiment", question: field("question"), framing: field("framing"), method: field("method"), observations: list("observations"), result: field("result"), limitations: list("limitations"), openQuestions: list("openQuestions") };
+    case "tool-utility":
+      return { template: "tool-utility", repeatedPain: field("repeatedPain"), interface: field("interface"), usage: field("usage"), implementation: field("implementation"), verification: field("verification") };
+    case "team-startup":
+      return { template: "team-startup", mission: field("mission"), teamContext: field("teamContext"), contribution: field("contribution"), outcome: field("outcome"), permission: field("permission") };
+    case "achievement-milestone":
+      return { template: "achievement-milestone", organization: field("organization"), date: field("date"), achievementType: field("achievementType"), whatIsProven: field("whatIsProven"), remainsUnproven: field("remainsUnproven") };
+    default:
+      return existing?.templateData ?? { template: "product-system", problem: "", audience: "", contribution: "", decisions: [], status: "Draft", nextImprovement: "" };
   }
-  return existing?.templateData ?? { template: "product-system", problem: "", audience: "", contribution: "", decisions: [], status: "Draft", nextImprovement: "" };
 }
 
 function toMutationInput(form: FormData, existing?: ProjectRecord): ContentMutationInput {

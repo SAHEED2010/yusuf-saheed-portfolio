@@ -104,5 +104,9 @@ export function describeChange(before: AnyContentRecord | undefined, after: AnyC
   if (before.evidence.length !== after.evidence.length) changes.push(`evidence items changed from ${before.evidence.length} to ${after.evidence.length}`);
   if (before.lifecycle !== after.lifecycle) changes.push(`lifecycle moves from ${before.lifecycle} to ${after.lifecycle}`);
   if (before.slug !== after.slug) changes.push(`slug changes from "${before.slug}" to "${after.slug}"`);
+  if (before.contentType === "project" && after.contentType === "project") {
+    if (before.templateData.template !== after.templateData.template) changes.push(`template switches from ${before.templateData.template} to ${after.templateData.template}`);
+    else if (JSON.stringify(before.templateData) !== JSON.stringify(after.templateData)) changes.push(`${after.templateData.template} fields updated`);
+  }
   return changes.length > 0 ? `Update "${after.title}": ${changes.join("; ")}.` : `No visible change to "${after.title}".`;
 }

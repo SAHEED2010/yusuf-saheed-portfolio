@@ -48,6 +48,17 @@ try {
   assert.equal(project.contentType, "project");
   assert.equal(project.templateData.template, "product-system", "a project without explicit templateData should default to product-system");
 
+  // describeChange() previously never looked at templateData at all, so
+  // switching a project's template -- a significant edit -- produced no
+  // mention of it in the summary shown before publishing.
+  const switched = updateContentRecord(project, { templateData: { template: "tool-utility", repeatedPain: "x", interface: "y", usage: "z", implementation: "a", verification: "b" } });
+  const switchSummary = describeChange(project, switched);
+  assert.match(switchSummary, /template switches from product-system to tool-utility/, "switching a project's template must be named in the change summary");
+
+  const sameTemplateEdit = updateContentRecord(project, { templateData: { problem: "A new problem statement" } });
+  const editSummary = describeChange(project, sameTemplateEdit);
+  assert.match(editSummary, /product-system fields updated/, "editing fields within the same template must still be described, distinctly from a template switch");
+
   database.closeDatabase();
   console.log("mutations smoke passed");
 } finally {
