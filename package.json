@@ -21,7 +21,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "simple-icons": "^16.30.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.4"
   },
   "devDependencies": {
     "@types/node": "^26.5.0",
